@@ -20,7 +20,7 @@ void setup() {
   Serial.begin(230400);
   while(!Serial);
 
-  PAGE_BUS_D = 0x1f;
+  PAGE_BUS_D = 0x7f;
   ADDRESS_BUS_D = 0xff;
 
   digitalWrite(CHIP_ENABLE_PIN, true);
@@ -127,9 +127,9 @@ void processReadCommand() {
   // assemble address
   int adr = ((adrHigh << 8) & 0xff00) | (adrLow & 0x00ff);
 
-  if (adr < 0 || adr >= 0x2000) {
+  if (adr < 0 || adr >= 0x8000) {
     digitalWrite(ERROR_LED, true);
-    Serial.println("-SYNTAX ERROR: ADDRESS MUST BE IN RANGE 0000..1FFF");
+    Serial.println("-SYNTAX ERROR: ADDRESS MUST BE IN RANGE 0000..7FFF");
     return;
   }
 
@@ -157,9 +157,9 @@ void processPageReadCommand() {
   // assemble address
   int adr = ((adrHigh << 8) & 0xff00) | (adrLow & 0x00ff);
 
-  if (adr < 0 || adr >= 0x2000) {
+  if (adr < 0 || adr >= 0x8000) {
     digitalWrite(ERROR_LED, true);
-    Serial.println("-SYNTAX ERROR: ADDRESS MUST BE IN RANGE 0000..1FFF");
+    Serial.println("-SYNTAX ERROR: ADDRESS MUST BE IN RANGE 0000..7FFF");
     return;
   }
 
@@ -193,9 +193,9 @@ void processWriteCommand() {
   // assemble address
   int adr = ((adrHigh << 8) & 0xff00) | (adrLow & 0x00ff);
 
-  if (adr < 0 || adr >= 0x2000) {
+  if (adr < 0 || adr >= 0x8000) {
     digitalWrite(ERROR_LED, true);
-    Serial.println("-SYNTAX ERROR: ADDRESS MUST BE IN RANGE 0000..1FFF");
+    Serial.println("-SYNTAX ERROR: ADDRESS MUST BE IN RANGE 0000..7FFF");
     return;
   }
 
@@ -236,9 +236,9 @@ void processPageWriteCommand() {
   // assemble address
   int adr = ((adrHigh << 8) & 0xff00) | (adrLow & 0x00ff);
 
-  if (adr < 0 || adr >= 0x2000) {
+  if (adr < 0 || adr >= 0x8000) {
     digitalWrite(ERROR_LED, true);
-    Serial.println("-SYNTAX ERROR: ADDRESS MUST BE IN RANGE 0000..1FFF");
+    Serial.println("-SYNTAX ERROR: ADDRESS MUST BE IN RANGE 0000..7FFF");
     return;
   }
 
@@ -256,7 +256,7 @@ void processPageWriteCommand() {
   }
 
   // build data buffer
-  byte data[128];
+  byte data[64];
   for(int i = 0; i < 64; i++) {
     data[i] = hexToByte(buffer + 6 + (2 * i));
   }
@@ -423,7 +423,7 @@ void pageWrite(int address, byte* data) {
 }
 
 void selectAddress(int addr) {
-  PAGE_BUS_O = (addr >> 8) & 0x001f;
+  PAGE_BUS_O = (addr >> 8) & 0x007f;
   ADDRESS_BUS_O = addr & 0x00ff;
 }
 
