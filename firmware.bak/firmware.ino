@@ -51,14 +51,12 @@ void loop() {
   }
 
   // we have data
-
   char c = Serial.read();
   if (c == 0 || c == '\r') {
     return;
   }
 
   // process char
-
   if (c == '\n') {
     // end of command -> process
     processBuffer();
@@ -67,7 +65,6 @@ void loop() {
   }
 
   // fill buffer
-
   if (buffer_length >= 256) {
     // buffer overflow -> complain and filter
     buffer_length = 0;
@@ -89,6 +86,10 @@ void processBuffer() {
     processPageReadCommand();
   } else if (buffer[0] == 'x') {
     processPageWriteCommand();
+  } else if (buffer[0] == 'l'&& buffer_length == 1) {
+    processLockCommand();
+  } else if (buffer[0] == 'u' && buffer_length == 1) {
+    processUnlockCommand();
   } else {
     digitalWrite(ERROR_LED, true);
     Serial.print("-SYNTAX ERROR: INVALID COMMAND: ");
@@ -265,6 +266,8 @@ void processPageWriteCommand() {
 
 }
 
+
+
 // -------------------------------------------------------
 // SERIAL PARSING LOGIC
 int hexToByte(char* input) {
@@ -342,6 +345,59 @@ void pageRead(int address) {
   digitalWrite(ERROR_LED, false);
 }
 
+void _quickSingleWrite(int address, byte data) {
+  selectAddress(address);
+  DATA_BUS_O = data;
+  digitalWrite(WRITE_ENABLE_PIN, false);
+  digitalWrite(WRITE_ENABLE_PIN, true);
+}
+
+void processUnlockCommand() {
+  digitalWrite(WRITE_LED, true);
+
+  DATA_BUS_D = 0xff;
+  chipEnable(true);
+
+  _quickSingleWrite(0x5555, 0xaa);
+  _quickSingleWrite(0x2aaa, 0x55);
+  _quickSingleWrite(0x5555, 0x80);
+  _quickSingleWrite(0x5555, 0xaa);
+  _quickSingleWrite(0x2aaa, 0x55);
+  _quickSingleWrite(0x5555, 0x20);
+
+  delay(10);
+
+  DATA_BUS_D = 0x00;
+  DATA_BUS_O = 0x00;
+  
+  chipEnable(false);
+  digitalWrite(ERROR_LED, false);
+  digitalWrite(WRITE_LED, false);
+  Serial.println("+");
+}
+
+void processLockCommand() {
+
+  digitalWrite(WRITE_LED, true);
+
+  DATA_BUS_D = 0xff;
+  chipEnable(true);
+
+  _quickSingleWrite(0x5555, 0xaa);
+  _quickSingleWrite(0x2aaa, 0x55);
+  _quickSingleWrite(0x5555, 0xa0);
+
+  delay(10);
+
+  DATA_BUS_D = 0x00;
+  DATA_BUS_O = 0x00;
+  
+  chipEnable(false);
+  digitalWrite(WRITE_LED, false);
+  digitalWrite(ERROR_LED, false);
+  Serial.println("+");
+}
+
 void write(int address, byte data) {
   chipEnable(true);
   selectAddress(address);
@@ -417,6 +473,7 @@ void pageWrite(int address, byte* data) {
       return;
     }
   }
+  digitalWrite(ERROR_LED, false);
   Serial.println("+");
   digitalWrite(OUTPUT_ENABLE_PIN, true);
   chipEnable(false);  
