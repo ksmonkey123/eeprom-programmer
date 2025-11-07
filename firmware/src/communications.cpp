@@ -1,30 +1,33 @@
 #include "communications.h"
+
 #include "status_indicator.h"
 
-static bool initialized = false;
+void initCommunications(HardwareSerial& serial) {
+   // if (serial) {
+        // we already initialized, nothing to do
+   //     return;
+    //}
 
-void initCommunications() {
-    if (initialized) {
-        return;
-    }
-
-    Serial.begin(230400);
-    while (!Serial) {
+    serial.begin(230400);
+    while (!serial) {
         // wait for serial port to be available
     }
-
     leds::indicateConnected();
 }
 
-int consumeUntilNextLineBreak();
-char readNextCharBlocking();
+int consumeUntilNextLineBreak(HardwareSerial& serial);
+char readNextCharBlocking(HardwareSerial& serial);
 
-int comms::receiveNextCommand(char* buffer, int limit) {
-    initCommunications();
+Communications::Communications(HardwareSerial& channel) : channel(channel) {
+    initCommunications(channel);
+}
 
+Print& Communications::getOutput() { return channel; }
+
+int Communications::receiveNextCommand(char* buffer, int limit) {
     int buffer_length = 0;
     while (true) {
-        char c = readNextCharBlocking();
+        char c = readNextCharBlocking(channel);
 
         if (c != '\n') {
             // if buffer already full, we need to throw everything out.
@@ -33,15 +36,14 @@ int comms::receiveNextCommand(char* buffer, int limit) {
                 buffer[buffer_length++] = c;
             } else {
                 leds::setErrorIndicator(true);
-                int overflow = consumeUntilNextLineBreak();
-                Serial.print("-SYNTAX ERROR: COMMAND BUFFER OVERFLOW: ");
+                int overflow = consumeUntilNextLineBreak(channel);
+                channel.print("-SYNTAX ERROR: COMMAND BUFFER OVERFLOW: ");
                 for (int i = 0; i < limit; i++) {
-                    Serial.print(buffer[i]);
+                    channel.print(buffer[i]);
                 }
-                Serial.print("... (");
-                Serial.print(overflow);
-                Serial.print(" more chars)");
-                Serial.println();
+                channel.print("... (");
+                channel.print(overflow);
+                channel.println(" more chars)");
                 buffer_length = 0;
             }
             continue;
@@ -51,21 +53,20 @@ int comms::receiveNextCommand(char* buffer, int limit) {
         if (buffer[0] == 'S' && buffer[1] == 'Y' && buffer[2] == 'N' &&
             buffer[3] == '_' && buffer_length == 6) {
             // handle sync directly.
-            Serial.print(buffer[0]);
-            Serial.print(buffer[1]);
-            Serial.print(buffer[2]);
-            Serial.print(buffer[3]);
-            Serial.print(buffer[4]);
-            Serial.print(buffer[5]);
-            Serial.println();
+            channel.print(buffer[0]);
+            channel.print(buffer[1]);
+            channel.print(buffer[2]);
+            channel.print(buffer[3]);
+            channel.print(buffer[4]);
+            channel.print(buffer[5]);
+            channel.println();
             // reset buffer
             buffer_length = 0;
             continue;
         }
 
         if (buffer_length == 0) {
-            Serial.print("-INVALID COMMAND: EMPTY LINE");
-            Serial.println();
+            channel.println("-INVALID COMMAND: EMPTY LINE");
             continue;
         }
 
@@ -74,14 +75,14 @@ int comms::receiveNextCommand(char* buffer, int limit) {
 }
 
 // helper functions
-char readNextCharBlocking() {
+char readNextCharBlocking(HardwareSerial& serial) {
     while (true) {
-        if (Serial.available() == 0) {
+        if (serial.available() == 0) {
             continue;
         }
 
         // we have data (ignore null char and \r)
-        char c = Serial.read();
+        char c = serial.read();
         if (c == 0 || c == '\r') {
             continue;
         }
@@ -90,40 +91,14 @@ char readNextCharBlocking() {
     }
 }
 
-int consumeUntilNextLineBreak() {
+int consumeUntilNextLineBreak(HardwareSerial& serial) {
     int counter = 1;
     while (true) {
-        char c = readNextCharBlocking();
+        char c = readNextCharBlocking(serial);
         if (c == '\n') {
             return counter;
         } else {
             counter++;
         }
     }
-}
-
-void comms::sendResponse(const char* buffer) {
-    Serial.print('+');
-    if (buffer != nullptr) {
-        Serial.print(buffer);
-    }
-    Serial.println();
-}
-
-void comms::sendError(const char* buffer) {
-    Serial.print('-');
-    if (buffer != nullptr) {
-        Serial.print(buffer);
-    }
-    Serial.println();
-}
-
-void comms::sendError(const char** buffer, int buffer_size) {
-    Serial.print('-');
-    for (int i = 0; i < buffer_size; i++) {
-        if (buffer[i] != nullptr) {
-            Serial.print(buffer[i]);
-        }
-    }
-    Serial.println();
 }

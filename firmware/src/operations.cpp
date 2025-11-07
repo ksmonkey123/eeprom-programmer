@@ -1,6 +1,5 @@
 #include "operations.h"
-
-#include "rom.h"
+#include "rom_interface.h"
 
 WriteResult createError(address address, byte expected, byte actual) {
     WriteResult error;
@@ -11,75 +10,71 @@ WriteResult createError(address address, byte expected, byte actual) {
     return error;
 }
 
-byte ops::byteRead(address address) {
-    rom::startAccess();
-    byte result = rom::read(address);
-    rom::endAccess();
+WriteResult createSuccess() {
+    WriteResult result;
+    result.success = true;
     return result;
 }
 
-WriteResult ops::byteWrite(address address, byte data) {
-    rom::startAccess();
-    rom::startWriteCycle();
-    rom::write(address, data);
-    rom::endWriteCycle();
-    byte result = rom::read(address);
-    rom::endAccess();
+byte ops::byteRead(address address) {
+    RomInterface interface;
 
-    if (data != result) {
-        return createError(address, data, result);
+    return interface.read(address);
+}
+
+WriteResult ops::byteWrite(address address, byte data) {
+    RomInterface interface;
+
+    interface.write(address, data);
+    byte readback = interface.read(address);
+
+    if (readback != data) {
+        return createError(address, data, readback);
     } else {
-        return WriteResult{.success = true};
+        return createSuccess();
     }
 }
 
 void ops::pageRead(address address, byte* dest) {
-    rom::startAccess();
-    for (int i = 0; i < 64; i++) {
-        dest[i] = rom::read(address + i);
+    RomInterface interface;
+
+    for(byte i = 0; i < 64; i++) {
+        dest[i] = interface.read(address + i);
     }
-    rom::endAccess();
 }
 
 WriteResult ops::pageWrite(address address, const byte* data) {
-    rom::startAccess();
-    rom::startWriteCycle();
+    RomInterface interface;
+
     for (int i = 0; i < 64; i++) {
-        rom::write(address + i, data[i]);
+        interface.write(address + i, data[i]);
     }
-    rom::endWriteCycle();
-    // verify data
-    WriteResult result = WriteResult{.success = true};
+
+    // verify
     for (int i = 0; i < 64; i++) {
-        byte readback = rom::read(address + i);
+        byte readback = interface.read(address + i);
         if (data[i] != readback) {
-            result = createError(address, data[i], readback);
-            break;
+            return createError(address, data[i], readback);
         }
     }
-    rom::endAccess();
-    return result;
+    return createSuccess();
 }
 
 void ops::lockSDP() {
-    rom::startAccess();
-    rom::startWriteCycle();
-    rom::write(0x5555, 0xaa);
-    rom::write(0x2aaa, 0x55);
-    rom::write(0x5555, 0xa0);
-    rom::endWriteCycle();
-    rom::endAccess();
+    RomInterface interface;
+
+    interface.write(0x5555, 0xaa);
+    interface.write(0x2aaa, 0x55);
+    interface.write(0x5555, 0xa0);
 }
 
 void ops::unlockSDP() {
-    rom::startAccess();
-    rom::startWriteCycle();
-    rom::write(0x5555, 0xaa);
-    rom::write(0x2aaa, 0x55);
-    rom::write(0x5555, 0x80);
-    rom::write(0x5555, 0xaa);
-    rom::write(0x2aaa, 0x55);
-    rom::write(0x5555, 0x20);
-    rom::endWriteCycle();
-    rom::endAccess();
+    RomInterface interface;
+
+    interface.write(0x5555, 0xaa);
+    interface.write(0x2aaa, 0x55);
+    interface.write(0x5555, 0x80);
+    interface.write(0x5555, 0xaa);
+    interface.write(0x2aaa, 0x55);
+    interface.write(0x5555, 0x20);
 }

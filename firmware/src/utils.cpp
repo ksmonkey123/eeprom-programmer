@@ -39,7 +39,7 @@ byte hexCharToHalfByte(char input) {
     }
 }
 
-char halfByteToHexChar(byte value) {
+char lowNibbleToHexChar(byte value) {
     switch (value & 0x0f) {
         case 0:
             return '0';
@@ -89,11 +89,6 @@ byte hexToByte(const char* input) {
     return ((high << 4) & 0xf0) | (low & 0x0f);
 }
 
-void byteToHex(byte value, char* dest) {
-    dest[0] = halfByteToHexChar((value >> 8) & 0x0f);
-    dest[1] = halfByteToHexChar(value & 0x0f);
-}
-
 address hexToAddress(const char* input) {
     address result = 0;
     for (byte i = 0; i < 4; i++) {
@@ -111,17 +106,4 @@ address hexToAddress(const char* input) {
     } else {
         return result;
     }
-}
-
-void addressToHex(address value, char* dest) {
-    dest[0] = halfByteToHexChar((value >> 12) & 0x0f);
-    dest[1] = halfByteToHexChar((value >> 8) & 0x0f);
-    dest[2] = halfByteToHexChar((value >> 4) & 0x0f);
-    dest[3] = halfByteToHexChar(value & 0x0f);
-}
-
-char* substring(const char* buffer, int length) {
-    char* target = new char[length + 1];
-    memcpy(target, buffer, length * sizeof(char));
-    return target;
 }
