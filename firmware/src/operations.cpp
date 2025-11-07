@@ -54,7 +54,7 @@ WriteResult ops::pageWrite(address address, const byte* data) {
     for (int i = 0; i < 64; i++) {
         byte readback = interface.read(address + i);
         if (data[i] != readback) {
-            return createError(address, data[i], readback);
+            return createError(address + i, data[i], readback);
         }
     }
     return createSuccess();
