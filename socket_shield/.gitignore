@@ -1,0 +1,12 @@
+#backups are built as zips
+*.zip
+
+#lock files
+*.lck
+
+# gerber files
+*.gbr
+*.drl
+
+fp-info-cache
+!gerber_bundles/*.zip
