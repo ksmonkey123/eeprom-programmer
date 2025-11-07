@@ -78,32 +78,35 @@ char lowNibbleToHexChar(byte value) {
     }
 }
 
-byte hexToByte(const char* input) {
-    byte high = hexCharToHalfByte(*(input + 0));
-    byte low = hexCharToHalfByte(*(input + 1));
+bool hexToByte(const char* input, byte* dest) {
+    byte high = hexCharToHalfByte(input[0]);
+    byte low = hexCharToHalfByte(input[1]);
 
     if (high == 255 || low == 255) {
-        return -1;
+        return false;
     }
 
-    return ((high << 4) & 0xf0) | (low & 0x0f);
+    *dest = ((high << 4) & 0xf0) + (low & 0x0f);
+    return true;
 }
 
-address hexToAddress(const char* input) {
+bool hexToAddress(const char* input, address* dest) {
     address result = 0;
     for (byte i = 0; i < 4; i++) {
         byte nextHalfByte = hexCharToHalfByte(input[i]);
         if (nextHalfByte == 255) {
-            return -1;
+            return false;
         }
+
         result = ((result << 4) & 0xfff0) | (nextHalfByte & 0x000f);
     }
 
     // addresses are only valid up to 0x7fff. If the leading bit is 1, we treat
     // it as bad.
     if (result > 0x7fff) {
-        return -1;
+        return false;
     } else {
-        return result;
+        *dest = result;
+        return true;
     }
 }

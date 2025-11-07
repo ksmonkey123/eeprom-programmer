@@ -8,12 +8,12 @@ class CommandExecutor {
    public:
     CommandExecutor(Print& output);
 
-    void lock();
-    void unlock();
+    void read(const char* args, int len);
+    void write(const char* args, int len);
 
-    void read(address address);
-    void write(address address, byte data);
+    void pageRead(const char* args, int len);
+    void pageWrite(const char* args, int len);
 
-    void pageRead(address address);
-    void pageWrite(address address, const byte* data);
+    void lock(const char* args, int len);
+    void unlock(const char* args, int len);
 };
