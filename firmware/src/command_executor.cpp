@@ -27,15 +27,15 @@ void sendWriteResult(WriteResult& result, Print& output) {
     if (result.success) {
         output.println('+');
     } else {
-        output.print("-WRITE CHECK ERROR: ADDRESS ");
+        output.print(F("-WRITE CHECK ERROR: ADDRESS "));
         output.print(lowNibbleToHexChar(result.error_address >> 12));
         output.print(lowNibbleToHexChar(result.error_address >> 8));
         output.print(lowNibbleToHexChar(result.error_address >> 4));
         output.print(lowNibbleToHexChar(result.error_address));
-        output.print(" EXPECTED ");
+        output.print(F(" EXPECTED "));
         output.print(lowNibbleToHexChar(result.error_expected >> 4));
         output.print(lowNibbleToHexChar(result.error_expected));
-        output.print(" BUT READ ");
+        output.print(F(" BUT READ "));
         output.print(lowNibbleToHexChar(result.error_actual >> 4));
         output.print(lowNibbleToHexChar(result.error_actual));
         output.println();

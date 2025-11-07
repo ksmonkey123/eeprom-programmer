@@ -3,9 +3,9 @@
 #include "status_indicator.h"
 
 void initCommunications(HardwareSerial& serial) {
-   // if (serial) {
-        // we already initialized, nothing to do
-   //     return;
+    // if (serial) {
+    // we already initialized, nothing to do
+    //     return;
     //}
 
     serial.begin(230400);
@@ -37,13 +37,13 @@ int Communications::receiveNextCommand(char* buffer, int limit) {
             } else {
                 leds::setErrorIndicator(true);
                 int overflow = consumeUntilNextLineBreak(channel);
-                channel.print("-SYNTAX ERROR: COMMAND BUFFER OVERFLOW: ");
+                channel.print(F("-SYNTAX ERROR: COMMAND BUFFER OVERFLOW: "));
                 for (int i = 0; i < limit; i++) {
                     channel.print(buffer[i]);
                 }
-                channel.print("... (");
+                channel.print(F("... ("));
                 channel.print(overflow);
-                channel.println(" more chars)");
+                channel.println(F(" more chars)"));
                 buffer_length = 0;
             }
             continue;
@@ -66,7 +66,7 @@ int Communications::receiveNextCommand(char* buffer, int limit) {
         }
 
         if (buffer_length == 0) {
-            channel.println("-INVALID COMMAND: EMPTY LINE");
+            channel.println(F("-INVALID COMMAND: EMPTY LINE"));
             continue;
         }
 

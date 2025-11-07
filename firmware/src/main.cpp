@@ -21,7 +21,7 @@
 address parseAddress(const char* buffer, Print& output) {
     address result = hexToAddress(buffer);
     if (result == (address)-1) {
-        output.print("-BAD ADDRESS VALUE: ");
+        output.print(F("-BAD ADDRESS VALUE: "));
         output.print(buffer[0]);
         output.print(buffer[1]);
         output.print(buffer[2]);
@@ -38,7 +38,7 @@ address parsePageAddress(const char* buffer, Print& output) {
     }
     // validate page boundary
     if ((result & 0x003f) > 0) {
-        output.print("-ADDRESS MUST BE AT PAGE START: ");
+        output.print(F("-ADDRESS MUST BE AT PAGE START: "));
         output.print(buffer[0]);
         output.print(buffer[1]);
         output.print(buffer[2]);
@@ -93,7 +93,7 @@ void loop() {
                 cmd.pageWrite(adr, data);
             }
         } else {
-            output.print("-UNSUPPORTED OR MALFORMED COMMAND: ");
+            output.print(F("-UNSUPPORTED OR MALFORMED COMMAND: "));
             for (int i = 0; i < length; i++) {
                 output.print(buffer[i]);
             }
