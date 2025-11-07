@@ -41,4 +41,8 @@ interface Programmer {
      */
     fun eraseChip()
 
+    fun lockChip()
+
+    fun unlockChip()
+
 }

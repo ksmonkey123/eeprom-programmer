@@ -64,4 +64,12 @@ class ComPortProgrammer(private val comDevice: ComDevice) : Programmer {
         flashChip(ByteArray(8192) { -1 })
     }
 
+    override fun lockChip() {
+        comDevice.sendCommand("l");
+    }
+
+    override fun unlockChip() {
+        comDevice.sendCommand("u");
+    }
+
 }
