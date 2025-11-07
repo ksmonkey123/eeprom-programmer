@@ -1,12 +1,9 @@
 package ch.awae.eeprom_programmer.com
 
-import ch.awae.eeprom_programmer.*
 import com.fazecast.jSerialComm.*
 import java.io.*
 
 class JscComDevice(comPort: SerialPort) : ComDevice {
-    private val logger = createLogger()
-
     private val tx: PrintWriter
     private val rx: BufferedReader
 
@@ -18,7 +15,7 @@ class JscComDevice(comPort: SerialPort) : ComDevice {
             throw RuntimeException("Could not open port")
         }
         println("connection opened to ${comPort.systemPortPath}")
-        println("waiting for device startup...")
+        print("waiting for device startup...")
 
         Thread.sleep(1000)
 
@@ -26,7 +23,7 @@ class JscComDevice(comPort: SerialPort) : ComDevice {
         rx = BufferedReader(InputStreamReader(comPort.inputStream))
 
         syncWithDevice()
-        println("connection established")
+        println("ok")
     }
 
     private var syncCounter = 0
@@ -35,34 +32,28 @@ class JscComDevice(comPort: SerialPort) : ComDevice {
             val string = "SYN_${syncCounter.toString().padStart(2, '0')}"
             syncCounter = (syncCounter + 1) % 100
 
-            logger.debug("> {}", string)
             tx.println(string)
             tx.flush()
 
             try {
                 do {
                     val received = rx.readLine() ?: throw IllegalStateException("stream terminated")
-                    logger.debug("< {}", received)
                     // it is possible that we receive bad lines. eat them and only check the last line
                 } while (received != string)
                 // we have the correct SYN packet -> finish sync
                 return
             } catch (e: SerialPortTimeoutException) {
-                logger.warn("Read Timeout")
+                System.err.println("Timeout")
             }
         }
         throw SerialPortTimeoutException("unable to sync with device in time!")
     }
 
     override fun sendCommand(command: String): String? = synchronized(this) {
-        logger.debug("> {}", command)
         tx.println(command)
         tx.flush()
 
         val response = rx.readLine() ?: throw IllegalStateException("stream terminated")
-        logger.debug("< {}", response)
-
-
         if (response.startsWith('+')) {
             return response.substring(1).takeUnless { it.isEmpty() }
         } else {

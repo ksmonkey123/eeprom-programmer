@@ -1,7 +1,5 @@
 package ch.awae.eeprom_programmer.api
 
-import ch.awae.eeprom_programmer.com.*
-
 interface Programmer {
 
     fun readByte(address: Int): UByte
@@ -25,24 +23,26 @@ interface Programmer {
     fun writePage(address: Int, data: ByteArray, startFrom: Int = 0)
 
     /**
-     * Dumps the entire memory of the chip, returning a 8192 element byte array
+     * Dumps the entire memory of the chip, returning a 8192 or 32768 element byte array
      */
-    fun dumpMemory(): ByteArray
+    fun dumpMemory(type: ChipType): ByteArray
 
     /**
      * Loads the entire chip.
      *
-     * @param data the data to write. the length must be at least 8192. only the first 8192 bytes are written
+     * @param data the data to write. The length must match the chip size
      */
-    fun flashChip(data: ByteArray)
+    fun flashChip(type: ChipType, data: ByteArray, progressCallback: (Int) -> Unit)
 
     /**
      * Write 0xff to each address
      */
-    fun eraseChip()
+    fun eraseChip(type: ChipType, progressCallback: (Int) -> Unit)
 
     fun lockChip()
 
     fun unlockChip()
+
+    fun rawCommand(command: String): String?
 
 }

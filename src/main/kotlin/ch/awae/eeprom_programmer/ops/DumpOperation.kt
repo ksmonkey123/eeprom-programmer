@@ -1,11 +1,9 @@
 package ch.awae.eeprom_programmer.ops
 
 import ch.awae.eeprom_programmer.api.*
-import org.springframework.stereotype.*
 import java.nio.file.*
 import kotlin.system.*
 
-@Component
 class DumpOperation(
     val programmer: Programmer
 ) : Operation(
@@ -21,7 +19,7 @@ class DumpOperation(
         }
 
         println("reading chip content...")
-        val dump = programmer.dumpMemory()
+        val dump = programmer.dumpMemory(ChipType.AT28C64B)
         println("writing to file... ($fileName)")
 
         Files.write(Path.of(fileName), dump)

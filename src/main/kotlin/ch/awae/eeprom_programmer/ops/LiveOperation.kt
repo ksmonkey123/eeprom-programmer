@@ -1,10 +1,8 @@
 package ch.awae.eeprom_programmer.ops
 
 import ch.awae.eeprom_programmer.com.*
-import org.springframework.stereotype.*
 import java.io.*
 
-@Component
 class LiveOperation(
     val comDevice: ComDevice,
 ) : Operation(

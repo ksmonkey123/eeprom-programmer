@@ -1,11 +1,9 @@
 package ch.awae.eeprom_programmer.ops
 
 import ch.awae.eeprom_programmer.api.*
-import org.springframework.stereotype.*
 import java.nio.file.*
 import kotlin.system.*
 
-@Component
 class LoadOperation(
     val programmer: Programmer
 ) : Operation(
@@ -29,7 +27,7 @@ class LoadOperation(
         }
 
         println("writing data to chip...")
-        programmer.flashChip(data)
+        programmer.flashChip(ChipType.AT28C64B, data) {}
         println("done")
     }
 
