@@ -2,28 +2,29 @@
 
 #include "rom.h"
 
-WriteResult createError(int address, byte expected, byte actual) {
+WriteResult createError(address address, byte expected, byte actual) {
     WriteResult error;
     error.success = false;
     error.error_address = address;
     error.error_expected = expected;
     error.error_actual = actual;
+    return error;
 }
 
-byte byteRead(int address) {
-    startAccess();
-    byte result = read(address);
-    endAccess();
+byte ops::byteRead(address address) {
+    rom::startAccess();
+    byte result = rom::read(address);
+    rom::endAccess();
     return result;
 }
 
-WriteResult byteWrite(int address, byte data) {
-    startAccess();
-    startWriteCycle();
-    write(address, data);
-    endWriteCycle();
-    byte result = read(address);
-    endAccess();
+WriteResult ops::byteWrite(address address, byte data) {
+    rom::startAccess();
+    rom::startWriteCycle();
+    rom::write(address, data);
+    rom::endWriteCycle();
+    byte result = rom::read(address);
+    rom::endAccess();
 
     if (data != result) {
         return createError(address, data, result);
@@ -32,54 +33,53 @@ WriteResult byteWrite(int address, byte data) {
     }
 }
 
-void pageRead(int address, byte* dest) {
-    startAccess();
+void ops::pageRead(address address, byte* dest) {
+    rom::startAccess();
     for (int i = 0; i < 64; i++) {
-        dest[i] = read(address + i);
+        dest[i] = rom::read(address + i);
     }
-    endAccess();
+    rom::endAccess();
 }
 
-WriteResult pageWrite(int address, const byte* data) {
-    startAccess();
-    startWriteCycle();
+WriteResult ops::pageWrite(address address, const byte* data) {
+    rom::startAccess();
+    rom::startWriteCycle();
     for (int i = 0; i < 64; i++) {
-        write(address + i, data[i]);
+        rom::write(address + i, data[i]);
     }
-    endWriteCycle();
+    rom::endWriteCycle();
     // verify data
     WriteResult result = WriteResult{.success = true};
     for (int i = 0; i < 64; i++) {
-        byte readback = read(address + i);
+        byte readback = rom::read(address + i);
         if (data[i] != readback) {
-            endAccess();
             result = createError(address, data[i], readback);
             break;
         }
     }
-    endAccess();
+    rom::endAccess();
     return result;
 }
 
-void lockSDP() {
-    startAccess();
-    startWriteCycle();
-    write(0x5555, 0xaa);
-    write(0x2aaa, 0x55);
-    write(0x5555, 0xa0);
-    endWriteCycle();
-    endAccess();
+void ops::lockSDP() {
+    rom::startAccess();
+    rom::startWriteCycle();
+    rom::write(0x5555, 0xaa);
+    rom::write(0x2aaa, 0x55);
+    rom::write(0x5555, 0xa0);
+    rom::endWriteCycle();
+    rom::endAccess();
 }
 
-void unlockSDP() {
-    startAccess();
-    startWriteCycle();
-    write(0x5555, 0xaa);
-    write(0x2aaa, 0x55);
-    write(0x5555, 0x80);
-    write(0x5555, 0xaa);
-    write(0x2aaa, 0x55);
-    write(0x5555, 0x20);
-    endWriteCycle();
-    endAccess();
+void ops::unlockSDP() {
+    rom::startAccess();
+    rom::startWriteCycle();
+    rom::write(0x5555, 0xaa);
+    rom::write(0x2aaa, 0x55);
+    rom::write(0x5555, 0x80);
+    rom::write(0x5555, 0xaa);
+    rom::write(0x2aaa, 0x55);
+    rom::write(0x5555, 0x20);
+    rom::endWriteCycle();
+    rom::endAccess();
 }

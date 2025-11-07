@@ -1,36 +1,41 @@
 #include "communications.h"
-#include "initializers.h"
 #include "status_indicator.h"
 
+static bool initialized = false;
+
 void initCommunications() {
+    if (initialized) {
+        return;
+    }
+
     Serial.begin(230400);
     while (!Serial) {
         // wait for serial port to be available
     }
-}
 
-// buffer needs space for 1 command char, 4 address chars, 1 separator and 128
-// data chars for page writes
-static char buffer[1 + 4 + 1 + 128];
+    leds::indicateConnected();
+}
 
 int consumeUntilNextLineBreak();
 char readNextCharBlocking();
 
-Command* receiveNextCommand() {
+int comms::receiveNextCommand(char* buffer, int limit) {
+    initCommunications();
+
     int buffer_length = 0;
     while (true) {
         char c = readNextCharBlocking();
 
         if (c != '\n') {
             // if buffer already full, we need to throw everything out.
-            if (buffer_length <= sizeof(buffer)) {
+            if (buffer_length < limit) {
                 // write into buffer.
                 buffer[buffer_length++] = c;
             } else {
-                setErrorIndicator(true);
+                leds::setErrorIndicator(true);
                 int overflow = consumeUntilNextLineBreak();
                 Serial.print("-SYNTAX ERROR: COMMAND BUFFER OVERFLOW: ");
-                for (int i = 0; i < sizeof(buffer); i++) {
+                for (int i = 0; i < limit; i++) {
                     Serial.print(buffer[i]);
                 }
                 Serial.print("... (");
@@ -58,12 +63,13 @@ Command* receiveNextCommand() {
             continue;
         }
 
-        // handle command
-        Command* result = new Command;
-        result->operation = buffer[0];
-        result->params = (buffer + 1);
-        result->params_size = buffer_length - 1;
-        return result;
+        if (buffer_length == 0) {
+            Serial.print("-INVALID COMMAND: EMPTY LINE");
+            Serial.println();
+            continue;
+        }
+
+        return buffer_length;
     }
 }
 
@@ -85,7 +91,7 @@ char readNextCharBlocking() {
 }
 
 int consumeUntilNextLineBreak() {
-    int counter = 0;
+    int counter = 1;
     while (true) {
         char c = readNextCharBlocking();
         if (c == '\n') {
@@ -96,17 +102,28 @@ int consumeUntilNextLineBreak() {
     }
 }
 
-void sendResponse(const Response* response) {
-    if (response->success) {
-        Serial.print('+');
-    } else {
-        Serial.print('-');
-    }
-
-    int length = response->payload_size;
-    for (int i = 0; i < length; i++) {
-        Serial.print(response->payload[i]);
+void comms::sendResponse(const char* buffer) {
+    Serial.print('+');
+    if (buffer != nullptr) {
+        Serial.print(buffer);
     }
     Serial.println();
-    setErrorIndicator(!response->success);
+}
+
+void comms::sendError(const char* buffer) {
+    Serial.print('-');
+    if (buffer != nullptr) {
+        Serial.print(buffer);
+    }
+    Serial.println();
+}
+
+void comms::sendError(const char** buffer, int buffer_size) {
+    Serial.print('-');
+    for (int i = 0; i < buffer_size; i++) {
+        if (buffer[i] != nullptr) {
+            Serial.print(buffer[i]);
+        }
+    }
+    Serial.println();
 }

@@ -1,18 +1,20 @@
 #pragma once
-#include <Arduino.h>
+#include "common.h"
 
 struct WriteResult {
     bool success;
-    int error_address;
+    address error_address;
     byte error_expected;
     byte error_actual;
 };
 
-byte byteRead(int address);
-WriteResult byteWrite(int address, byte data);
+namespace ops {
+byte byteRead(address address);
+WriteResult byteWrite(address address, byte data);
 
-void pageRead(int address, byte* dest);
-WriteResult pageWrite(int address, const byte* data);
+void pageRead(address address, byte* dest);
+WriteResult pageWrite(address address, const byte* data);
 
 void lockSDP();
 void unlockSDP();
+}  // namespace ops

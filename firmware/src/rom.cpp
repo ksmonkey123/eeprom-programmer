@@ -1,6 +1,5 @@
 #include "rom.h"
 
-#include "initializers.h"
 #include "status_indicator.h"
 
 #define ADDRESS_BUS_O PORTF
@@ -27,41 +26,42 @@ void initRom() {
     pinMode(WRITE_ENABLE_PIN, OUTPUT);
 }
 
-void startAccess() {
-    setActiveIndicator(true);
+void rom::startAccess() {
+    initRom();
+    leds::setActiveIndicator(true);
     digitalWrite(CHIP_ENABLE_PIN, false);
     digitalWrite(OUTPUT_ENABLE_PIN, false);
 }
 
-void endAccess() {
+void rom::endAccess() {
     digitalWrite(OUTPUT_ENABLE_PIN, true);
     digitalWrite(CHIP_ENABLE_PIN, true);
-    setActiveIndicator(false);
+    leds::setActiveIndicator(false);
 }
 
-void startWriteCycle() {
-    setWriteIndicator(true);
+void rom::startWriteCycle() {
+    leds::setWriteIndicator(true);
     digitalWrite(OUTPUT_ENABLE_PIN, true);
     DATA_BUS_D = 0xff;
     DATA_BUS_O = 0x00;
 }
 
-void endWriteCycle() {
+void rom::endWriteCycle() {
     // we need a delay at the end of a write cycle to let the chip finish up.
     delay(10);
     DATA_BUS_D = 0x00;
     DATA_BUS_O = 0x00;
     digitalWrite(OUTPUT_ENABLE_PIN, false);
-    setWriteIndicator(false);
+    leds::setWriteIndicator(false);
 }
 
-byte read(int address) {
+byte rom::read(address address) {
     PAGE_BUS_O = (address >> 8) & 0x007f;
     ADDRESS_BUS_O = address & 0x00ff;
     return DATA_BUS_I;
 }
 
-void write(int address, byte data) {
+void rom::write(address address, byte data) {
     PAGE_BUS_O = (address >> 8) & 0x007f;
     ADDRESS_BUS_O = address & 0x00ff;
     DATA_BUS_O = data;

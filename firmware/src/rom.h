@@ -1,11 +1,13 @@
 #pragma once
-#include <Arduino.h>
+#include "common.h"
 
+namespace rom {
 void startAccess();
 void endAccess();
 
 void startWriteCycle();
 void endWriteCycle();
 
-byte read(int address);
-void write(int address, byte data);
+byte read(address address);
+void write(address address, byte data);
+}  // namespace rom
