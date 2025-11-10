@@ -8,6 +8,8 @@ struct WriteResult {
     byte error_actual;
 };
 
+enum ChipSize { SMALL, LARGE };
+
 namespace ops {
 byte byteRead(address address);
 WriteResult byteWrite(address address, byte data);
@@ -17,4 +19,6 @@ WriteResult pageWrite(address address, const byte* data);
 
 void lockSDP();
 void unlockSDP();
+
+ChipSize sizeTest();
 }  // namespace ops

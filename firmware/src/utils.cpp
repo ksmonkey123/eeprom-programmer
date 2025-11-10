@@ -110,3 +110,23 @@ bool hexToAddress(const char* input, address* dest) {
         return true;
     }
 }
+
+void printData(byte value, Print& output) {
+    if (value < 0x10) {
+        output.print('0');
+    }
+    output.print(value, HEX);
+}
+
+void printAddress(address value, Print& output) {
+    if (value < 0x1000) {
+        output.print('0');
+    }
+    if (value < 0x0100) {
+        output.print('0');
+    }
+    if (value < 0x0010) {
+        output.print('0');
+    }
+    output.print(value, HEX);
+}

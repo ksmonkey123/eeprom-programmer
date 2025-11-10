@@ -27,3 +27,13 @@ bool hexToByte(const char* input, byte* dest);
  * @returns `true` if successful.
  */
 bool hexToAddress(const char* input, address* dest);
+
+/**
+ * print the provided byte to the output as a 2-char hex value (with leading zeroes)
+ */
+void printData(byte value, Print& output);
+
+/**
+ * print the provided address to the output as a 4-char hex value (with leading zeroes)
+ */
+void printAddress(address value, Print& output);
