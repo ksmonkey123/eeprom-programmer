@@ -40,27 +40,28 @@ class ComPortProgrammer(private val comDevice: ComDevice) : Programmer {
         comDevice.sendCommand(sb.toString())
     }
 
-    override fun dumpMemory(type: ChipType): ByteArray {
+    override fun dumpMemory(type: ChipType, progressCallback: () -> Unit): ByteArray {
         val dump = ByteArray(type.size)
 
         for (page in (0..<type.size).step(64)) {
             val pageContent = readLine(page)
             pageContent.copyInto(dump, destinationOffset = page)
+            progressCallback()
         }
 
         return dump
     }
 
-    override fun flashChip(type: ChipType, data: ByteArray, progressCallback: (Int) -> Unit) {
+    override fun flashChip(type: ChipType, data: ByteArray, progressCallback: () -> Unit) {
         if (data.size != type.size) throw java.lang.IllegalArgumentException("bad data size. ${type.size} bytes expected")
 
         for (i in (0..<type.size).step(64)) {
             writePage(i, data, i)
-            progressCallback(i + 1)
+            progressCallback()
         }
     }
 
-    override fun eraseChip(type: ChipType, progressCallback: (Int) -> Unit) {
+    override fun eraseChip(type: ChipType, progressCallback: () -> Unit) {
         flashChip(type, ByteArray(type.size) { -1 }, progressCallback)
     }
 
@@ -70,6 +71,14 @@ class ComPortProgrammer(private val comDevice: ComDevice) : Programmer {
 
     override fun unlockChip() {
         comDevice.sendCommand("u");
+    }
+
+    override fun sizeTest(): ChipType {
+        return when (val result = comDevice.sendCommand("t")) {
+            "S" -> ChipType.AT28C64B
+            "L" -> ChipType.AT28C256
+            else -> throw IllegalArgumentException("bad test response: $result")
+        }
     }
 
     override fun rawCommand(command: String): String? {

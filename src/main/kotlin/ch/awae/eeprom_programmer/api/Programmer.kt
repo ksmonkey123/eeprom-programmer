@@ -23,25 +23,32 @@ interface Programmer {
     fun writePage(address: Int, data: ByteArray, startFrom: Int = 0)
 
     /**
-     * Dumps the entire memory of the chip, returning a 8192 or 32768 element byte array
+     * Dumps the entire memory of the chip, returning a 8192 or 32768 element byte array.
+     *
+     * @param progressCallback is called after every 64 byte block.
      */
-    fun dumpMemory(type: ChipType): ByteArray
+    fun dumpMemory(type: ChipType, progressCallBack: () -> Unit): ByteArray
 
     /**
      * Loads the entire chip.
      *
-     * @param data the data to write. The length must match the chip size
+     * @param data the data to write. The length must match the chip size.
+     * @param progressCallback is called after every 64 byte block.
      */
-    fun flashChip(type: ChipType, data: ByteArray, progressCallback: (Int) -> Unit)
+    fun flashChip(type: ChipType, data: ByteArray, progressCallback: () -> Unit)
 
     /**
      * Write 0xff to each address
+     *
+     * @param progressCallback is called after every 64 byte block.
      */
-    fun eraseChip(type: ChipType, progressCallback: (Int) -> Unit)
+    fun eraseChip(type: ChipType, progressCallback: () -> Unit)
 
     fun lockChip()
 
     fun unlockChip()
+
+    fun sizeTest(): ChipType
 
     fun rawCommand(command: String): String?
 
