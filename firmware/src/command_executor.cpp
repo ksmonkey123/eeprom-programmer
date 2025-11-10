@@ -77,16 +77,11 @@ void sendWriteResult(WriteResult& result, Print& output) {
         output.println('+');
     } else {
         output.print(F("-WRITE CHECK ERROR: ADDRESS "));
-        output.print(lowNibbleToHexChar(result.error_address >> 12));
-        output.print(lowNibbleToHexChar(result.error_address >> 8));
-        output.print(lowNibbleToHexChar(result.error_address >> 4));
-        output.print(lowNibbleToHexChar(result.error_address));
+        printAddress(result.error_address, output);
         output.print(F(" EXPECTED "));
-        output.print(lowNibbleToHexChar(result.error_expected >> 4));
-        output.print(lowNibbleToHexChar(result.error_expected));
+        printData(result.error_expected, output);
         output.print(F(" BUT READ "));
-        output.print(lowNibbleToHexChar(result.error_actual >> 4));
-        output.print(lowNibbleToHexChar(result.error_actual));
+        printData(result.error_actual, output);
         output.println();
     }
 }
@@ -107,14 +102,35 @@ void CommandExecutor::unlock(const char* args, int len) {
     }
 }
 
+void CommandExecutor::sizeTest(const char* args, int len) {
+    if (validateLength(len, 0, output)) {
+        ChipSize size;
+        WriteResult result = ops::sizeTest(&size);
+        if (result.success) {
+            switch (size) {
+                case SMALL:
+                    output.println("+S");
+                    break;
+                case LARGE:
+                    output.println("+L");
+                    break;
+                default:
+                    output.println("-Invalid Test Result");
+                    break;
+            }
+        } else {
+            sendWriteResult(result, output);
+        }
+    }
+}
+
 void CommandExecutor::read(const char* args, int len) {
     address adr;
     if (validateLength(len, 4, output) &&
         parseAddress(args, &adr, false, output)) {
         byte data = ops::byteRead(adr);
         output.print('+');
-        output.print(lowNibbleToHexChar(data >> 4));
-        output.print(lowNibbleToHexChar(data));
+        printData(data, output);
         output.println();
     }
 }
@@ -139,8 +155,7 @@ void CommandExecutor::pageRead(const char* args, int len) {
         ops::pageRead(adr, data);
         output.print('+');
         for (byte i = 0; i < 64; i++) {
-            output.print(lowNibbleToHexChar(data[i] >> 4));
-            output.print(lowNibbleToHexChar(data[i]));
+            printData(data[i], output);
         }
         output.println();
     }

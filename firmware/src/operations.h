@@ -20,5 +20,5 @@ WriteResult pageWrite(address address, const byte* data);
 void lockSDP();
 void unlockSDP();
 
-ChipSize sizeTest();
+WriteResult sizeTest(ChipSize* dest);
 }  // namespace ops

@@ -1,4 +1,5 @@
 #include "operations.h"
+
 #include "rom_interface.h"
 
 WriteResult createError(address address, byte expected, byte actual) {
@@ -38,7 +39,7 @@ WriteResult ops::byteWrite(address address, byte data) {
 void ops::pageRead(address address, byte* dest) {
     RomInterface interface;
 
-    for(byte i = 0; i < 64; i++) {
+    for (byte i = 0; i < 64; i++) {
         dest[i] = interface.read(address + i);
     }
 }
@@ -77,4 +78,43 @@ void ops::unlockSDP() {
     interface.write(0x5555, 0xaa);
     interface.write(0x2aaa, 0x55);
     interface.write(0x5555, 0x20);
+}
+
+WriteResult ops::sizeTest(ChipSize* dest) {
+    RomInterface interface;
+    byte readback;
+
+    address adr = random(0x0000, 0x2000);
+    byte data = interface.read(adr);
+    byte inverse = ~data;
+
+    // if there's different data in the "high" block, it is a large chip, no
+    // further testing required.
+    if (data != interface.read(adr + 0x2000)) {
+        *dest = LARGE;
+        return createSuccess();
+    }
+
+    // modify low byte, check if high byte changes too
+    interface.write(adr, inverse);
+    readback = interface.read(adr);
+    if (readback != inverse) {
+        return createError(adr, inverse, readback);
+    }
+
+    if (data == interface.read(adr + 0x2000)) {
+        // high byte unchanged -> large
+        *dest = LARGE;
+    } else {
+        // high byte changed too -> small
+        *dest = SMALL;
+    }
+
+    // restore data
+    interface.write(adr, data);
+    readback = interface.read(adr);
+    if (readback != data) {
+        return createError(adr, data, readback);
+    }
+    return createSuccess();
 }

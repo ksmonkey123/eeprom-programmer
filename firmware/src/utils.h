@@ -2,11 +2,6 @@
 #include "common.h"
 
 /**
- * convert the lower 4 bits of a byte into a single hex char.
- */
-char lowNibbleToHexChar(byte value);
-
-/**
  * convert 2 hex chars into an 8-bit number.
  * in Case of any error, `dest` is not touched.
  *

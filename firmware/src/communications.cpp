@@ -78,6 +78,9 @@ int Communications::receiveNextCommand(char* buffer, int limit) {
 char readNextCharBlocking(HardwareSerial& serial) {
     while (true) {
         if (serial.available() == 0) {
+            // use idle time waiting on new data for seeding the RNG
+            random();
+
             continue;
         }
 
