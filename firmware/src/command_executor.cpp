@@ -39,7 +39,7 @@ bool parseData(const char* buffer, byte* dest, Print& output) {
 
 bool parseDataBlock(const char* buffer, byte* dest, int bytes, Print& output) {
     for (int i = 0; i < bytes; i++) {
-        if (!parseData(buffer + i, dest + i, output)) {
+        if (!parseData(buffer + (2*i), dest + i, output)) {
             return false;
         }
     }
