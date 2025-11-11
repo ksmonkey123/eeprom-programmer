@@ -17,5 +17,5 @@ class CommandExecutor {
     void lock(const char* args, int len);
     void unlock(const char* args, int len);
 
-    void sizeTest(const char* args, int len);
+    void identifyType(const char* args, int len);
 };

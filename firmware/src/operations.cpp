@@ -80,7 +80,7 @@ void ops::unlockSDP() {
     interface.write(0x5555, 0x20);
 }
 
-WriteResult ops::sizeTest(ChipSize* dest) {
+WriteResult ops::identifyType(ChipType* dest) {
     RomInterface interface;
     byte readback;
 
@@ -91,7 +91,7 @@ WriteResult ops::sizeTest(ChipSize* dest) {
     // if there's different data in the "high" block, it is a large chip, no
     // further testing required.
     if (data != interface.read(adr + 0x2000)) {
-        *dest = LARGE;
+        *dest = LARGE_SOCKET;
         return createSuccess();
     }
 
@@ -104,10 +104,10 @@ WriteResult ops::sizeTest(ChipSize* dest) {
 
     if (data == interface.read(adr + 0x2000)) {
         // high byte unchanged -> large
-        *dest = LARGE;
+        *dest = LARGE_SOCKET;
     } else {
         // high byte changed too -> small
-        *dest = SMALL;
+        *dest = SMALL_SOCKET;
     }
 
     // restore data

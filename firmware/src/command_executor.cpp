@@ -102,22 +102,26 @@ void CommandExecutor::unlock(const char* args, int len) {
     }
 }
 
-void CommandExecutor::sizeTest(const char* args, int len) {
+void printTypeResult(ChipType type, Print& output) {
+    switch (type) {
+        case SMALL_SOCKET:
+            output.println(F("+SS"));
+            break;
+        case LARGE_SOCKET:
+            output.println(F("+LS"));
+            break;
+        default:
+            output.println(F("-INVALID TYPE"));
+            break;
+    }
+}
+
+void CommandExecutor::identifyType(const char* args, int len) {
     if (validateLength(len, 0, output)) {
-        ChipSize size;
-        WriteResult result = ops::sizeTest(&size);
+        ChipType size;
+        WriteResult result = ops::identifyType(&size);
         if (result.success) {
-            switch (size) {
-                case SMALL:
-                    output.println("+S");
-                    break;
-                case LARGE:
-                    output.println("+L");
-                    break;
-                default:
-                    output.println("-Invalid Test Result");
-                    break;
-            }
+            printTypeResult(size, output);
         } else {
             sendWriteResult(result, output);
         }

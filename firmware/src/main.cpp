@@ -52,8 +52,8 @@ void loop() {
             case 'x':
                 cmd.pageWrite(args, len);
                 break;
-            case 't':
-                cmd.sizeTest(args, len);
+            case 'i':
+                cmd.identifyType(args, len);
                 break;
             default:
                 output.print(F("-UNSUPPORTED OR MALFORMED COMMAND: "));
