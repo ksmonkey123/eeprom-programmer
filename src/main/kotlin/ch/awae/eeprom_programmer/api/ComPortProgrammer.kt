@@ -12,7 +12,7 @@ class ComPortProgrammer(private val comDevice: ComDevice) : Programmer {
         return result.toInt(16).toUByte()
     }
 
-    override fun readLine(address: Int): ByteArray {
+    override fun readPage(address: Int): ByteArray {
         if (address % 64 != 0) throw java.lang.IllegalArgumentException("address must be start of a page")
 
         val result = comDevice.sendCommand("p${address.hex(4)}")
@@ -44,7 +44,7 @@ class ComPortProgrammer(private val comDevice: ComDevice) : Programmer {
         val dump = ByteArray(type.size)
 
         for (page in (0..<type.size).step(64)) {
-            val pageContent = readLine(page)
+            val pageContent = readPage(page)
             pageContent.copyInto(dump, destinationOffset = page)
             progressCallback()
         }
@@ -53,7 +53,8 @@ class ComPortProgrammer(private val comDevice: ComDevice) : Programmer {
     }
 
     override fun flashChip(type: ChipType, data: ByteArray, progressCallback: () -> Unit) {
-        if (data.size != type.size) throw java.lang.IllegalArgumentException("bad data size. ${type.size} bytes expected")
+        if (data.size > type.size) throw java.lang.IllegalArgumentException("bad data size. ${type.size} bytes expected")
+        if (data.size % 64 != 0) throw java.lang.IllegalArgumentException("bad data size. must be page aligned")
 
         for (i in (0..<type.size).step(64)) {
             writePage(i, data, i)
@@ -73,7 +74,7 @@ class ComPortProgrammer(private val comDevice: ComDevice) : Programmer {
         comDevice.sendCommand("u");
     }
 
-    override fun sizeTest(): ChipType {
+    override fun identifyType(): ChipType {
         return when (val result = comDevice.sendCommand("t")) {
             "S" -> ChipType.AT28C64B
             "L" -> ChipType.AT28C256

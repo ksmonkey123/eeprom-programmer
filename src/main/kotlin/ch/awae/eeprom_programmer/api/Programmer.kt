@@ -11,7 +11,7 @@ interface Programmer {
      *
      * @param address starting address of a memory page. The lowest 6 bits must be zero. (address must be divisible by 64)
      */
-    fun readLine(address: Int): ByteArray
+    fun readPage(address: Int): ByteArray
 
     /**
      * Writes an entire 64bit page of memory
@@ -27,7 +27,7 @@ interface Programmer {
      *
      * @param progressCallback is called after every 64 byte block.
      */
-    fun dumpMemory(type: ChipType, progressCallBack: () -> Unit): ByteArray
+    fun dumpMemory(type: ChipType, progressCallback: () -> Unit = {}): ByteArray
 
     /**
      * Loads the entire chip.
@@ -35,20 +35,20 @@ interface Programmer {
      * @param data the data to write. The length must match the chip size.
      * @param progressCallback is called after every 64 byte block.
      */
-    fun flashChip(type: ChipType, data: ByteArray, progressCallback: () -> Unit)
+    fun flashChip(type: ChipType, data: ByteArray, progressCallback: () -> Unit = {})
 
     /**
      * Write 0xff to each address
      *
      * @param progressCallback is called after every 64 byte block.
      */
-    fun eraseChip(type: ChipType, progressCallback: () -> Unit)
+    fun eraseChip(type: ChipType, progressCallback: () -> Unit = {})
 
     fun lockChip()
 
     fun unlockChip()
 
-    fun sizeTest(): ChipType
+    fun identifyType(): ChipType
 
     fun rawCommand(command: String): String?
 

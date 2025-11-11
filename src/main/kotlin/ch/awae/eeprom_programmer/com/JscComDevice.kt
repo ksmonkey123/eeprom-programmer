@@ -23,7 +23,7 @@ class JscComDevice(comPort: SerialPort) : ComDevice {
         rx = BufferedReader(InputStreamReader(comPort.inputStream))
 
         syncWithDevice()
-        println("ok")
+        println(" ok")
     }
 
     private var syncCounter = 0

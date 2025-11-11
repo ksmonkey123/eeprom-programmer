@@ -4,6 +4,7 @@ import ch.awae.eeprom_programmer.*
 import ch.awae.eeprom_programmer.api.*
 import picocli.CommandLine.*
 import java.io.*
+import java.nio.file.*
 
 @Command(name = "dump", description = ["read the entire EEPROM and write the contents to disk"])
 class DumpCommand : Runnable {
@@ -15,31 +16,29 @@ class DumpCommand : Runnable {
     lateinit var file: File
 
     override fun run() {
-        val programmer = cli.programmerFactory()
+        val programmer = ConsoleLoggingProgrammer(cli.programmerFactory())
 
-        var type = cli.options.sizeSelection?.type()
+        if (cli.options.unlock) {
+            programmer.unlockChip()
+        }
 
+        val type = cli.options.sizeSelection?.type()
         val assumedType = type ?: ChipType.AT28C256
 
-        val progress = SteppedProgressBar(64, assumedType.size / 64)
-        print("reading chip $progress")
-        val contents = programmer.dumpMemory(assumedType) {
-            progress.step()
-            print("\rreading chip $progress")
-        }
-        println()
+        val contents = programmer.dumpMemory(assumedType)
 
         val output = if (type == null) {
             postProcessContents(contents)
         } else {
             contents
         }
-        print("read ${output.size} bytes of data")
-
-        TODO()
+        print("writing ${output.size} bytes to ${file.canonicalPath}...")
+        Files.write(file.toPath(), output)
+        println(" ok")
+        println("done")
     }
 
-    fun postProcessContents(buffer: ByteArray): ByteArray {
+    private fun postProcessContents(buffer: ByteArray): ByteArray {
         require(buffer.size == 32768)
         val buffer0 = buffer.sliceArray(0..8191)
         val buffer1 = buffer.sliceArray(8192..16383)
@@ -49,11 +48,6 @@ class DumpCommand : Runnable {
         if (buffer0.contentEquals(buffer1) && buffer0.contentEquals(buffer2) && buffer0.contentEquals(buffer3)) {
             // full 8k match
             return buffer0
-        }
-
-        if (buffer0.contentEquals(buffer2) && buffer1.contentEquals(buffer3)) {
-            // 16k match
-            return buffer.sliceArray(0..16383)
         }
 
         // no match

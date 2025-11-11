@@ -10,11 +10,9 @@ class LockCommand : Runnable {
     lateinit var cli: EepromCLI
 
     override fun run() {
-        val programmer = cli.programmerFactory()
+        val programmer = ConsoleLoggingProgrammer(cli.programmerFactory())
 
-        print("locking chip...")
         programmer.lockChip()
-        println(" ok")
 
         println("done")
     }

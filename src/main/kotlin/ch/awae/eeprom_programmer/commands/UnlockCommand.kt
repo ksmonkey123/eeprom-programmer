@@ -10,15 +10,13 @@ class UnlockCommand : Runnable {
     lateinit var cli: EepromCLI
 
     override fun run() {
-        val programmer = cli.programmerFactory()
+        val programmer = ConsoleLoggingProgrammer(cli.programmerFactory())
 
-        if(cli.options.lock) {
+        if (cli.options.lock) {
             println("WARNING: lock option is set but will be ignored!")
         }
 
-        print("unlocking chip...")
         programmer.unlockChip()
-        println(" ok")
 
         println("done")
     }
