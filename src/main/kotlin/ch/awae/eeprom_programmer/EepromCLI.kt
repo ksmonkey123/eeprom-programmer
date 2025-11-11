@@ -12,6 +12,7 @@ import picocli.CommandLine.*
         LockCommand::class,
         UnlockCommand::class,
         DumpCommand::class,
+        FlashCommand::class,
         ShellCommand::class,
     ]
 )

@@ -75,9 +75,9 @@ class ComPortProgrammer(private val comDevice: ComDevice) : Programmer {
     }
 
     override fun identifyType(): ChipType {
-        return when (val result = comDevice.sendCommand("t")) {
-            "S" -> ChipType.AT28C64B
-            "L" -> ChipType.AT28C256
+        return when (val result = comDevice.sendCommand("i")) {
+            "SS" -> ChipType.AT28C64B
+            "LS" -> ChipType.AT28C256
             else -> throw IllegalArgumentException("bad test response: $result")
         }
     }
