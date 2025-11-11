@@ -1,0 +1,26 @@
+package ch.awae.eeprom_programmer.cli
+
+import ch.awae.eeprom_programmer.backend.api.*
+import ch.awae.eeprom_programmer.cli.commands.*
+import picocli.CommandLine.*
+
+@Command(
+    name = "eeprom", mixinStandardHelpOptions = true, version = ["1.1.0"],
+    sortOptions = false,
+    subcommands = [
+        EraseCommand::class,
+        LockCommand::class,
+        UnlockCommand::class,
+        DumpCommand::class,
+        FlashCommand::class,
+        ShellCommand::class,
+    ]
+)
+class EepromCLI(
+    val programmerFactory: () -> Programmer
+) {
+
+    @Mixin
+    lateinit var options: WriteOptions
+
+}

@@ -8,14 +8,21 @@
         <version>3.5.7</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>ch.awae</groupId>
-    <artifactId>eeprom-programmer</artifactId>
+    <groupId>ch.awae.eeprom-programmer</groupId>
+    <artifactId>project-repo</artifactId>
     <version>1.1.x-SNAPSHOT</version>
+    <packaging>pom</packaging>
 
     <properties>
         <java.version>21</java.version>
         <kotlin.version>2.1.0</kotlin.version>
     </properties>
+
+    <modules>
+        <module>eeprom-backend</module>
+        <module>eeprom-cli</module>
+        <module>eeprom-cli-app</module>
+    </modules>
 
     <dependencies>
         <dependency>
@@ -31,26 +38,13 @@
             <artifactId>kotlin-test-junit5</artifactId>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>com.fazecast</groupId>
-            <artifactId>jSerialComm</artifactId>
-            <version>2.11.0</version>
-        </dependency>
-        <dependency>
-            <groupId>info.picocli</groupId>
-            <artifactId>picocli</artifactId>
-            <version>4.7.7</version>
-        </dependency>
+
     </dependencies>
 
     <build>
         <sourceDirectory>${project.basedir}/src/main/kotlin</sourceDirectory>
         <testSourceDirectory>${project.basedir}/src/test/kotlin</testSourceDirectory>
         <plugins>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-            </plugin>
             <plugin>
                 <groupId>org.jetbrains.kotlin</groupId>
                 <artifactId>kotlin-maven-plugin</artifactId>
@@ -69,6 +63,23 @@
                         <version>${kotlin.version}</version>
                     </dependency>
                 </dependencies>
+            </plugin>
+            <plugin>
+                <groupId>com.github.danielflower.mavenplugins</groupId>
+                <artifactId>multi-module-maven-release-plugin</artifactId>
+                <version>3.8.0</version>
+                <configuration>
+                    <noChangesAction>ReleaseAll</noChangesAction>
+                    <pushTags>false</pushTags>
+                    <pullTags>false</pullTags>
+                    <releaseGoals>
+                        <releaseGoal>clean</releaseGoal>
+                        <releaseGoal>deploy</releaseGoal>
+                    </releaseGoals>
+                    <releaseProfiles>
+                        <releaseProfile>docker</releaseProfile>
+                    </releaseProfiles>
+                </configuration>
             </plugin>
         </plugins>
     </build>
