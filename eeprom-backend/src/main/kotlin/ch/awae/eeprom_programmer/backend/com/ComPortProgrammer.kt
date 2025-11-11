@@ -55,7 +55,7 @@ class ComPortProgrammer(private val comDevice: ComDevice) : Programmer {
         if (data.size > type.size) throw java.lang.IllegalArgumentException("bad data size. ${type.size} bytes expected")
         if (data.size % 64 != 0) throw java.lang.IllegalArgumentException("bad data size. must be page aligned")
 
-        for (i in (0..<type.size).step(64)) {
+        for (i in data.indices.step(64)) {
             writePage(i, data, i)
             progressCallback()
         }
