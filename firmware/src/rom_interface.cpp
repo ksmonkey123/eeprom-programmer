@@ -53,78 +53,25 @@ void endWriteCycle() {
     leds::setWriteIndicator(false);
 }
 
-void startRead(RomInterfaceState* currentState) {
-    switch (*currentState) {
-        case IDLE:
-            startAccess();
-            break;
-        case READ:
-            // nothing to do
-            break;
-        case WRITE:
-            endWriteCycle();
-            break;
-    }
-    *currentState = READ;
-}
-
-void startWrite(RomInterfaceState* currentState) {
-    switch (*currentState) {
-        case IDLE:
-            startAccess();
-            startWriteCycle();
-            break;
-        case READ:
-            startWriteCycle();
-            break;
-        case WRITE:
-            // nothing to do
-            break;
-    }
-    *currentState = WRITE;
-}
-
-void startIdle(RomInterfaceState* currentState) {
-    switch (*currentState) {
-        case IDLE:
-            // nothing to do
-            break;
-        case READ:
-            endAccess();
-            break;
-        case WRITE:
-            endWriteCycle();
-            endAccess();
-            break;
-    }
-    *currentState = WRITE;
-}
-
-void stateTransition(RomInterfaceState* current,
-                     RomInterfaceState target) {
-    if (*current == target) {
-        // nothing to do
-        return;
-    }
-    switch (target) {
-        case IDLE:
-            startIdle(current);
-            break;
-        case READ:
-            startRead(current);
-            break;
-        case WRITE:
-            startWrite(current);
-            break;
-    }
-}
-
 RomInterface::RomInterface() { state = IDLE; }
 
-RomInterface::~RomInterface() { stateTransition(&state, IDLE); }
+RomInterface::~RomInterface() {
+    if (state == WRITE) {
+        endWriteCycle();
+        endAccess();
+    } else if (state == READ) {
+        endAccess();
+    }
+    state = IDLE;
+}
 
 byte RomInterface::read(address address) {
-    stateTransition(&state, READ);
+    if (state == WRITE) {
+        endWriteCycle();
+    } else if (state == IDLE) {
+        startAccess();
+    }
+    state = READ;
 
     PAGE_BUS_O = (address >> 8) & 0x007f;
     ADDRESS_BUS_O = address & 0x00ff;
@@ -133,7 +80,13 @@ byte RomInterface::read(address address) {
 }
 
 void RomInterface::write(address address, byte data) {
-    stateTransition(&state, WRITE);
+    if (state == IDLE) {
+        startAccess();
+        startWriteCycle();
+    } else if (state == READ) {
+        startWriteCycle();
+    }
+    state = WRITE;
 
     PAGE_BUS_O = (address >> 8) & 0x007f;
     ADDRESS_BUS_O = address & 0x00ff;
