@@ -52,6 +52,9 @@ void loop() {
             case 'x':
                 cmd.pageWrite(args, len);
                 break;
+            case 's':
+                cmd.pageSparseWrite(args, len);
+                break;
             case 'i':
                 cmd.identifyType(args, len);
                 break;

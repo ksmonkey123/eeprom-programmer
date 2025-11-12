@@ -39,8 +39,29 @@ bool parseData(const char* buffer, byte* dest, Print& output) {
 
 bool parseDataBlock(const char* buffer, byte* dest, int bytes, Print& output) {
     for (int i = 0; i < bytes; i++) {
-        if (!parseData(buffer + (2*i), dest + i, output)) {
+        if (!parseData(buffer + (2 * i), dest + i, output)) {
             return false;
+        }
+    }
+    return true;
+}
+
+bool parseSparseDataBlock(const char* buffer, SparsePageElement* dest,
+                          int* countDest, int bytes, Print& output) {
+    *countDest = 0;
+    for (int i = 0; i < bytes; i++) {
+        if (buffer[2 * i] == '.' && buffer[2 * i + 1] == '.') {
+            // skip element
+            continue;
+        } else {
+            byte data;
+            if (!parseData(buffer + (2 * i), &data, output)) {
+                return false;
+            }
+            // we have found a new element
+            dest[*countDest].offset = i;
+            dest[*countDest].data = data;
+            (*countDest)++;
         }
     }
     return true;
@@ -173,6 +194,20 @@ void CommandExecutor::pageWrite(const char* args, int len) {
         validateChar(args, 4, ':', output) &&
         parseDataBlock(args + 5, data, 64, output)) {
         WriteResult result = ops::pageWrite(adr, data);
+        sendWriteResult(result, output);
+    }
+}
+
+void CommandExecutor::pageSparseWrite(const char* args, int len) {
+    address adr;
+    SparsePageElement elements[64];
+    int nelements;
+
+    if (validateLength(len, 133, output) &&
+        parseAddress(args, &adr, true, output) &&
+        validateChar(args, 4, ':', output) &&
+        parseSparseDataBlock(args + 5, elements, &nelements, 64, output)) {
+        WriteResult result = ops::pageSparseWrite(adr, elements, nelements);
         sendWriteResult(result, output);
     }
 }

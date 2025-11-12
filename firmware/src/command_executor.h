@@ -13,6 +13,7 @@ class CommandExecutor {
 
     void pageRead(const char* args, int len);
     void pageWrite(const char* args, int len);
+    void pageSparseWrite(const char* args, int len);
 
     void lock(const char* args, int len);
     void unlock(const char* args, int len);

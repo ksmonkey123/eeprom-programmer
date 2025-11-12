@@ -61,6 +61,26 @@ WriteResult ops::pageWrite(address address, const byte* data) {
     return createSuccess();
 }
 
+WriteResult ops::pageSparseWrite(address address,
+                                 const SparsePageElement* elements,
+                                 int nelements) {
+    RomInterface interface;
+
+    for (int i = 0; i < nelements && i < 64; i++) {
+        interface.write(address + elements[i].offset, elements[i].data);
+    }
+
+    // verify
+    for (int i = 0; i < nelements && i < 64; i++) {
+        byte readback = interface.read(address + elements[i].offset);
+        if (elements[i].data != readback) {
+            return createError(address + elements[i].offset, elements[i].data,
+                               readback);
+        }
+    }
+    return createSuccess();
+}
+
 void ops::lockSDP() {
     RomInterface interface;
 
