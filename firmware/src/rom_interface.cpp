@@ -75,7 +75,7 @@ byte RomInterface::read(address address) {
 
     PAGE_BUS_O = (address >> 8) & 0x007f;
     ADDRESS_BUS_O = address & 0x00ff;
-    delayMicroseconds(100);
+    delayMicroseconds(10);
     return DATA_BUS_I;
 }
 
