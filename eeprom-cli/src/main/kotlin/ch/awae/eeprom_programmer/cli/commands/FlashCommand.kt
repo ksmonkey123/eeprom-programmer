@@ -13,6 +13,9 @@ class FlashCommand : Runnable {
     @ParentCommand
     lateinit var cli: EepromCLI
 
+    @Option(names = ["-e", "--erase"], description = ["erase chip before writing"])
+    var erase: Boolean = false
+
     @Parameters(index = "0", paramLabel = "<file>", description = ["the output file path"])
     lateinit var file: File
 
@@ -38,6 +41,10 @@ class FlashCommand : Runnable {
         val type = cli.options.sizeSelection?.type() ?: programmer.identifyType()
 
         require(file.currentSize <= type.size) { "Cannot write to EEPROM. File too large" }
+
+        if (this.erase) {
+            programmer.eraseChip(type)
+        }
 
         programmer.flashChip(type, file)
 
