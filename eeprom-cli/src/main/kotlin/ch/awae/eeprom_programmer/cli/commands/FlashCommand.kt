@@ -1,5 +1,6 @@
 package ch.awae.eeprom_programmer.cli.commands
 
+import ch.awae.binfiles.hex.*
 import ch.awae.eeprom_programmer.cli.*
 import ch.awae.eeprom_programmer.cli.internals.*
 import picocli.CommandLine.*
@@ -22,8 +23,11 @@ class FlashCommand : Runnable {
         }
 
         print("reading file ${file.canonicalPath}...")
-        val data = Files.readAllBytes(file.toPath())
-        println(" ${data.size} bytes")
+        val file = HexFileReader(Files.newInputStream(file.toPath())).use { reader ->
+            reader.read()!!
+        }
+
+        println(" ${file.currentSize} bytes")
 
         val programmer = ConsoleLoggingProgrammer(cli.programmerFactory())
 
@@ -33,27 +37,9 @@ class FlashCommand : Runnable {
 
         val type = cli.options.sizeSelection?.type() ?: programmer.identifyType()
 
-        require(data.size <= type.size) { "Cannot write to EEPROM. File too large" }
+        require(file.currentSize <= type.size) { "Cannot write to EEPROM. File too large" }
 
-        val writeBuffer = if (data.size % 64 != 0) {
-            // we need to pad the "broken" final line
-            val startOfFinalLine = (data.size / 64) * 64
-            val overflowBytes = data.size % 64
-
-            print("reading data to supply the missing ${64 - overflowBytes} bytes to fill the last page...")
-            val page = programmer.readPage(startOfFinalLine)
-            println(" ok")
-
-            val buffer = ByteArray(((data.size / 64) * 64) + 64)
-            data.copyInto(buffer)
-            page.copyInto(buffer, data.size, overflowBytes, 64)
-            println("prepared ${buffer.size} bytes to write to chip")
-            buffer
-        } else {
-            data
-        }
-
-        programmer.flashChip(type, writeBuffer)
+        programmer.flashChip(type, file)
 
         if (cli.options.lock) {
             programmer.lockChip()

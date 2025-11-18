@@ -1,19 +1,25 @@
 package ch.awae.eeprom_programmer.cli.internals
 
 
+import ch.awae.binfiles.BinaryFile
 import ch.awae.eeprom_programmer.backend.api.*
 
 class ConsoleLoggingProgrammer(val backer: Programmer) : Programmer {
 
-    private class SteppedProgressBar(val width: Int, val limit: Int) {
+    private class SteppedProgressBar(val width: Int, var limit: Int) {
         private var state = 0
 
         fun step() {
             state++
         }
 
+        fun set(value: Int, limit: Int) {
+            state = value
+            this.limit = limit
+        }
+
         override fun toString(): String {
-            val filled = (state * width) / limit
+            val filled = if (limit > 0) (state * width) / limit else 0
             val empty = width - filled
             return "[" + "|".repeat(filled) + " ".repeat(empty) + "] $state/$limit"
         }
@@ -48,13 +54,13 @@ class ConsoleLoggingProgrammer(val backer: Programmer) : Programmer {
         return contents
     }
 
-    override fun flashChip(type: ChipType, data: ByteArray, progressCallback: () -> Unit) {
-        val progress = SteppedProgressBar(64, data.size / 64)
-        print("writing chip $progress")
-        backer.flashChip(type, data) {
-            progress.step()
+    override fun flashChip(type: ChipType, file: BinaryFile, progressCallback: (ProgressReport) -> Unit) {
+        val progress = SteppedProgressBar(64, 0)
+        print("writing chip...")
+        backer.flashChip(type, file) {
+            progress.set(it.progress, it.total)
             print("\rwriting chip $progress")
-            progressCallback()
+            progressCallback(it)
         }
         println()
     }

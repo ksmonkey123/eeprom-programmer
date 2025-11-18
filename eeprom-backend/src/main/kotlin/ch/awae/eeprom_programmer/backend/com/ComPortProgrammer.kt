@@ -1,6 +1,8 @@
 package ch.awae.eeprom_programmer.backend.com
 
+import ch.awae.binfiles.*
 import ch.awae.eeprom_programmer.backend.api.*
+import java.util.*
 
 class ComPortProgrammer(private val comDevice: ComDevice) : Programmer {
 
@@ -51,14 +53,46 @@ class ComPortProgrammer(private val comDevice: ComDevice) : Programmer {
         return dump
     }
 
-    override fun flashChip(type: ChipType, data: ByteArray, progressCallback: () -> Unit) {
-        if (data.size > type.size) throw java.lang.IllegalArgumentException("bad data size. ${type.size} bytes expected")
-        if (data.size % 64 != 0) throw java.lang.IllegalArgumentException("bad data size. must be page aligned")
+    fun flashChip(type: ChipType, data: ByteArray, progressCallback: () -> Unit) {
+        if (data.size > type.size) throw IllegalArgumentException("bad data size. ${type.size} bytes expected")
+        if (data.size % 64 != 0) throw IllegalArgumentException("bad data size. must be page aligned")
 
         for (i in data.indices.step(64)) {
             writePage(i, data, i)
             progressCallback()
         }
+    }
+
+    override fun flashChip(type: ChipType, file: BinaryFile, progressCallback: (ProgressReport) -> Unit) {
+        if (file.currentSize > type.size) throw IllegalArgumentException("file size (${file.currentSize} bytes) exceeds chip capacity (${type.size} bytes)")
+
+        val fragments = file.iterator(64).toList()
+        fragments.forEachIndexed { i, fragment ->
+            writeFragment(fragment)
+            progressCallback(ProgressReport(i + 1, fragments.size))
+        }
+    }
+
+    private fun writeFragment(fragment: DataFragment) {
+        val address = fragment.position and 0xffc0
+        val offset = fragment.position and 0x003f
+        val endPadding = 64 - (fragment.length + offset)
+
+        val sb = StringBuilder("s${address.hex(4)}:")
+
+        sb.append("..".repeat(offset))
+        sb.append(HexFormat.of().withUpperCase().formatHex(fragment.data))
+        sb.append("..".repeat(endPadding))
+
+        comDevice.sendCommand(sb.toString())
+    }
+
+    private fun <T> Iterator<T>.toList(): List<T> {
+        val list = mutableListOf<T>()
+        while (hasNext()) {
+            list.add(next())
+        }
+        return list
     }
 
     override fun eraseChip(type: ChipType, progressCallback: () -> Unit) {

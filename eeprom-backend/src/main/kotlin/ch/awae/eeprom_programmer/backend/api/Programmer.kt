@@ -1,5 +1,8 @@
 package ch.awae.eeprom_programmer.backend.api
 
+import ch.awae.binfiles.BinaryFile
+import jdk.jfr.DataAmount
+
 interface Programmer {
 
     fun readByte(address: Int): UByte
@@ -30,12 +33,11 @@ interface Programmer {
     fun dumpMemory(type: ChipType, progressCallback: () -> Unit = {}): ByteArray
 
     /**
-     * Loads the entire chip.
+     * Writes a [ch.awae.binfiles.BinaryFile] to the chip.
      *
-     * @param data the data to write. The length must match the chip size.
-     * @param progressCallback is called after every 64 byte block.
+     * @param file the data to write.
      */
-    fun flashChip(type: ChipType, data: ByteArray, progressCallback: () -> Unit = {})
+    fun flashChip(type: ChipType, file: BinaryFile, progressCallback: (ProgressReport) -> Unit = {})
 
     /**
      * Write 0xff to each address

@@ -1,5 +1,7 @@
 package ch.awae.eeprom_programmer.cli.commands
 
+import ch.awae.binfiles.*
+import ch.awae.binfiles.hex.*
 import ch.awae.eeprom_programmer.backend.api.*
 import ch.awae.eeprom_programmer.cli.*
 import ch.awae.eeprom_programmer.cli.internals.*
@@ -28,13 +30,24 @@ class DumpCommand : Runnable {
 
         val contents = programmer.dumpMemory(assumedType)
 
+
+        print("post-processing data...")
         val output = if (type == null) {
             postProcessContents(contents)
         } else {
             contents
         }
-        print("writing ${output.size} bytes to ${file.canonicalPath}...")
-        Files.write(file.toPath(), output)
+
+        val file = BinaryFile()
+        output.forEachIndexed { index, value ->
+            file.addByte(index, value)
+        }
+        println(" ok")
+
+        print("writing to ${this.file.canonicalPath}...")
+        HexFileWriter(Files.newOutputStream(this.file.toPath())).use {
+            it.write(file)
+        }
         println(" ok")
         println("done")
     }
