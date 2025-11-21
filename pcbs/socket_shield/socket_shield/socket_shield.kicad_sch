@@ -4679,7 +4679,7 @@
 		)
 		(uuid "2aff2e4f-ddeb-4b6a-988b-8a38e981162b")
 	)
-	(label "*44"
+	(label "id5"
 		(at 39.37 109.22 270)
 		(effects
 			(font
@@ -4889,7 +4889,7 @@
 		)
 		(uuid "7a340465-ddf2-4e14-85f1-4a30c021908d")
 	)
-	(label "47"
+	(label "id2"
 		(at 36.83 142.24 90)
 		(effects
 			(font
@@ -4919,7 +4919,7 @@
 		)
 		(uuid "7c6f747d-801a-4335-a279-c299dd021294")
 	)
-	(label "*45"
+	(label "id4"
 		(at 39.37 142.24 90)
 		(effects
 			(font
@@ -5099,7 +5099,7 @@
 		)
 		(uuid "ab2493cb-ab24-42da-9f45-eafddf866104")
 	)
-	(label "42"
+	(label "id7"
 		(at 41.91 109.22 270)
 		(effects
 			(font
@@ -5259,7 +5259,7 @@
 		)
 		(uuid "c775d4e8-c37b-4e73-90c1-1c8d36333aac")
 	)
-	(label "*46"
+	(label "id3"
 		(at 36.83 109.22 270)
 		(effects
 			(font
@@ -5389,7 +5389,7 @@
 		)
 		(uuid "e7ce99b8-ca22-4c56-9e55-39d32c709f3c")
 	)
-	(label "49"
+	(label "id0"
 		(at 34.29 142.24 90)
 		(effects
 			(font
@@ -5479,7 +5479,7 @@
 		)
 		(uuid "f971dfdf-10c5-478f-810c-23069995bed8")
 	)
-	(label "43"
+	(label "id6"
 		(at 41.91 142.24 90)
 		(effects
 			(font
@@ -5539,7 +5539,7 @@
 		)
 		(uuid "fe75186b-fcb4-4cdd-bd6e-6b90c00b9cce")
 	)
-	(label "48"
+	(label "id1"
 		(at 34.29 109.22 270)
 		(effects
 			(font
@@ -7101,6 +7101,69 @@
 			(project ""
 				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
 					(reference "U1")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 34.29 142.24 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "4a63e27f-18dd-44f6-a53c-ee305d210493")
+		(property "Reference" "#PWR014"
+			(at 34.29 148.59 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "GND"
+			(at 34.4043 146.5644 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 34.29 142.24 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 34.29 142.24 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+			(at 34.29 142.24 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "6a3b38db-d20d-4f70-8e20-fc2e97fe206c")
+		)
+		(instances
+			(project "socket_shield"
+				(path "/e63e39d7-6ac0-4ffd-8aa3-1841a4541b55"
+					(reference "#PWR014")
 					(unit 1)
 				)
 			)

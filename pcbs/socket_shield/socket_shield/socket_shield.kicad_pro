@@ -517,7 +517,7 @@
       "gencad": "",
       "idf": "",
       "netlist": "",
-      "plot": "",
+      "plot": "CAM/socket_shield_rev_a/",
       "pos_files": "",
       "specctra_dsn": "",
       "step": "",
