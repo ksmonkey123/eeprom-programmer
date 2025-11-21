@@ -6874,10 +6874,10 @@
 			)
 		)
 		(pin "1"
-			(uuid "82b42458-d6e6-412b-a72c-06c5b47c61b2")
+			(uuid "82b42458-d6e6-412b-a72c-06c5b47c61b3")
 		)
 		(pin "2"
-			(uuid "76037594-1088-4754-9eee-6613cbb37c7a")
+			(uuid "76037594-1088-4754-9eee-6613cbb37c7b")
 		)
 		(instances
 			(project ""
@@ -6944,10 +6944,10 @@
 			)
 		)
 		(pin "2"
-			(uuid "a49f025b-d4a2-41fe-a781-53d82a4f6829")
+			(uuid "a49f025b-d4a2-41fe-a781-53d82a4f682a")
 		)
 		(pin "1"
-			(uuid "f6b4c82f-a388-4116-81a3-66fd6020c0c3")
+			(uuid "f6b4c82f-a388-4116-81a3-66fd6020c0c4")
 		)
 		(instances
 			(project ""
@@ -6986,7 +6986,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Package_DIP:DIP-28_W15.24mm_Socket_LongPads"
+		(property "Footprint" "customs-fp:DIP-28_600_ELL"
 			(at 133.35 31.75 0)
 			(effects
 				(font
@@ -7294,10 +7294,10 @@
 			)
 		)
 		(pin "1"
-			(uuid "82b42458-d6e6-412b-a72c-06c5b47c61b2")
+			(uuid "82b42458-d6e6-412b-a72c-06c5b47c61b4")
 		)
 		(pin "2"
-			(uuid "76037594-1088-4754-9eee-6613cbb37c7a")
+			(uuid "76037594-1088-4754-9eee-6613cbb37c7c")
 		)
 		(instances
 			(project ""
@@ -7364,10 +7364,10 @@
 			)
 		)
 		(pin "2"
-			(uuid "a49f025b-d4a2-41fe-a781-53d82a4f6829")
+			(uuid "a49f025b-d4a2-41fe-a781-53d82a4f682b")
 		)
 		(pin "1"
-			(uuid "f6b4c82f-a388-4116-81a3-66fd6020c0c3")
+			(uuid "f6b4c82f-a388-4116-81a3-66fd6020c0c5")
 		)
 		(instances
 			(project ""
@@ -7781,10 +7781,10 @@
 			)
 		)
 		(pin "2"
-			(uuid "70ebaf32-7c29-4dec-aa52-ab5dfd871ad3")
+			(uuid "70ebaf32-7c29-4dec-aa52-ab5dfd871ad4")
 		)
 		(pin "1"
-			(uuid "16d155bb-70de-4e76-a997-1d8c2e9bc138")
+			(uuid "16d155bb-70de-4e76-a997-1d8c2e9bc139")
 		)
 		(instances
 			(project ""
@@ -7860,10 +7860,10 @@
 			)
 		)
 		(pin "2"
-			(uuid "70ebaf32-7c29-4dec-aa52-ab5dfd871ad3")
+			(uuid "70ebaf32-7c29-4dec-aa52-ab5dfd871ad5")
 		)
 		(pin "1"
-			(uuid "16d155bb-70de-4e76-a997-1d8c2e9bc138")
+			(uuid "16d155bb-70de-4e76-a997-1d8c2e9bc13a")
 		)
 		(instances
 			(project ""
