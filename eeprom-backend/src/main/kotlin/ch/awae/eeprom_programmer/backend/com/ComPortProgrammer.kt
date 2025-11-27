@@ -66,7 +66,7 @@ class ComPortProgrammer(private val comDevice: ComDevice) : Programmer {
     override fun flashChip(type: ChipType, file: BinaryFile, progressCallback: (ProgressReport) -> Unit) {
         if (file.currentSize > type.size) throw IllegalArgumentException("file size (${file.currentSize} bytes) exceeds chip capacity (${type.size} bytes)")
 
-        val fragments = file.iterator(64).toList()
+        val fragments = file.fragments(64).toList()
         fragments.forEachIndexed { i, fragment ->
             writeFragment(fragment)
             progressCallback(ProgressReport(i + 1, fragments.size))
