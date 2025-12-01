@@ -6,14 +6,7 @@ import java.util.*
 
 class ComPortProgrammer(private val comDevice: ComDevice) : Programmer {
 
-    override fun readByte(address: Int): UByte {
-        val result = comDevice.sendCommand("r${address.hex(4)}")
-            ?: throw NullPointerException("read command expects a response")
-
-        return result.toInt(16).toUByte()
-    }
-
-    override fun readPage(address: Int): ByteArray {
+    fun readPage(address: Int): ByteArray {
         if (address % 64 != 0) throw java.lang.IllegalArgumentException("address must be start of a page")
 
         val result = comDevice.sendCommand("p${address.hex(4)}")
@@ -24,11 +17,7 @@ class ComPortProgrammer(private val comDevice: ComDevice) : Programmer {
             .toByteArray()
     }
 
-    override fun writeByte(address: Int, data: UByte) {
-        comDevice.sendCommand("w${address.hex(4)}:${data.toInt().hex(2)}")
-    }
-
-    override fun writePage(address: Int, data: ByteArray, startFrom: Int) {
+    fun writePage(address: Int, data: ByteArray, startFrom: Int) {
         if (address % 64 != 0) throw java.lang.IllegalArgumentException("address must be start of a page")
         if (data.size < 64 + startFrom) throw java.lang.IllegalArgumentException("less than 64 bytes provided")
 

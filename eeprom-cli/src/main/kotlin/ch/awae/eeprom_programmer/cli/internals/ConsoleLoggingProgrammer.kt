@@ -26,14 +26,6 @@ class ConsoleLoggingProgrammer(val backer: Programmer) : Programmer {
 
     }
 
-    override fun readByte(address: Int): UByte {
-        return backer.readByte(address)
-    }
-
-    override fun writeByte(address: Int, data: UByte) {
-        backer.writeByte(address, data)
-    }
-
     override fun readPage(address: Int): ByteArray {
         return backer.readPage(address)
     }
