@@ -1,30 +1,33 @@
-#include "communications.h"
+#include "../include/communications.h"
+#include "../include/status_indicator.h"
 
-#include "status_indicator.h"
-
-void initCommunications(HardwareSerial& serial) {
-    // if (serial) {
-    // we already initialized, nothing to do
-    //     return;
-    //}
-
+void initCommunications(HardwareSerial &serial) {
     serial.begin(230400);
-    while (!serial) {
-        // wait for serial port to be available
-    }
     leds::indicateConnected();
 }
 
-int consumeUntilNextLineBreak(HardwareSerial& serial);
-char readNextCharBlocking(HardwareSerial& serial);
+int consumeUntilNextLineBreak(HardwareSerial &serial);
 
-Communications::Communications(HardwareSerial& channel) : channel(channel) {
+char readNextCharBlocking(HardwareSerial &serial);
+
+Communications::Communications(HardwareSerial &channel) : channel(channel) {
     initCommunications(channel);
 }
 
-Print& Communications::getOutput() { return channel; }
+Print &Communications::getOutput() { return channel; }
 
-int Communications::receiveNextCommand(char* buffer, int limit) {
+static void log_command_buffer_overflow(HardwareSerial &channel, char const *buffer, int limit, int overflow) {
+    channel.print(F("-SYNTAX ERROR: COMMAND BUFFER OVERFLOW: "));
+    for (int i = 0; i < limit; i++) {
+        channel.print(buffer[i]);
+    }
+
+    channel.print(F("... ("));
+    channel.print(overflow);
+    channel.println(F(" more chars)"));
+}
+
+int Communications::receiveNextCommand(char *buffer, int limit) {
     int buffer_length = 0;
     while (true) {
         char c = readNextCharBlocking(channel);
@@ -37,13 +40,7 @@ int Communications::receiveNextCommand(char* buffer, int limit) {
             } else {
                 leds::setErrorIndicator(true);
                 int overflow = consumeUntilNextLineBreak(channel);
-                channel.print(F("-SYNTAX ERROR: COMMAND BUFFER OVERFLOW: "));
-                for (int i = 0; i < limit; i++) {
-                    channel.print(buffer[i]);
-                }
-                channel.print(F("... ("));
-                channel.print(overflow);
-                channel.println(F(" more chars)"));
+                log_command_buffer_overflow(channel, buffer, limit, overflow);
                 buffer_length = 0;
             }
             continue;
@@ -53,12 +50,9 @@ int Communications::receiveNextCommand(char* buffer, int limit) {
         if (buffer[0] == 'S' && buffer[1] == 'Y' && buffer[2] == 'N' &&
             buffer[3] == '_' && buffer_length == 6) {
             // handle sync directly.
-            channel.print(buffer[0]);
-            channel.print(buffer[1]);
-            channel.print(buffer[2]);
-            channel.print(buffer[3]);
-            channel.print(buffer[4]);
-            channel.print(buffer[5]);
+            for (int i = 0; i < 6; i++) {
+                channel.print(buffer[i]);
+            }
             channel.println();
             // reset buffer
             buffer_length = 0;
@@ -75,7 +69,7 @@ int Communications::receiveNextCommand(char* buffer, int limit) {
 }
 
 // helper functions
-char readNextCharBlocking(HardwareSerial& serial) {
+char readNextCharBlocking(HardwareSerial &serial) {
     while (true) {
         if (serial.available() == 0) {
             // use idle time waiting on new data for seeding the RNG
@@ -85,7 +79,7 @@ char readNextCharBlocking(HardwareSerial& serial) {
         }
 
         // we have data (ignore null char and \r)
-        char c = serial.read();
+        const auto c = static_cast<char>(serial.read());
         if (c == 0 || c == '\r') {
             continue;
         }
@@ -94,14 +88,13 @@ char readNextCharBlocking(HardwareSerial& serial) {
     }
 }
 
-int consumeUntilNextLineBreak(HardwareSerial& serial) {
+int consumeUntilNextLineBreak(HardwareSerial &serial) {
     int counter = 1;
     while (true) {
         char c = readNextCharBlocking(serial);
         if (c == '\n') {
             return counter;
-        } else {
-            counter++;
         }
+        counter++;
     }
 }

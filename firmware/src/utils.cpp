@@ -1,4 +1,4 @@
-#include "utils.h"
+#include "../include/utils.h"
 
 byte hexCharToHalfByte(char input) {
     switch (input) {
@@ -39,7 +39,7 @@ byte hexCharToHalfByte(char input) {
     }
 }
 
-bool hexToByte(const char* input, byte* dest) {
+bool hexToByte(const char *input, byte *dest) {
     byte high = hexCharToHalfByte(input[0]);
     byte low = hexCharToHalfByte(input[1]);
 
@@ -51,7 +51,7 @@ bool hexToByte(const char* input, byte* dest) {
     return true;
 }
 
-bool hexToAddress(const char* input, address* dest) {
+bool hexToAddress(const char *input, address *dest) {
     address result = 0;
     for (byte i = 0; i < 4; i++) {
         byte nextHalfByte = hexCharToHalfByte(input[i]);
@@ -72,14 +72,14 @@ bool hexToAddress(const char* input, address* dest) {
     }
 }
 
-void printData(byte value, Print& output) {
+void printData(byte value, Print &output) {
     if (value < 0x10) {
         output.print('0');
     }
     output.print(value, HEX);
 }
 
-void printAddress(address value, Print& output) {
+void printAddress(address value, Print &output) {
     if (value < 0x1000) {
         output.print('0');
     }

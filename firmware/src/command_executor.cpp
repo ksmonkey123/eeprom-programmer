@@ -1,10 +1,10 @@
-#include "command_executor.h"
+#include "../include/command_executor.h"
 
-#include "operations.h"
-#include "utils.h"
+#include "../include/operations.h"
+#include "../include/utils.h"
 
-bool parseAddress(const char* buffer, address* dest, bool pageAddress,
-                  Print& output) {
+bool parseAddress(const char *buffer, address *dest, bool pageAddress,
+                  Print &output) {
     bool success = hexToAddress(buffer, dest);
     // bad address format
     if (!success) {
@@ -27,7 +27,7 @@ bool parseAddress(const char* buffer, address* dest, bool pageAddress,
     return true;
 }
 
-bool parseData(const char* buffer, byte* dest, Print& output) {
+bool parseData(const char *buffer, byte *dest, Print &output) {
     bool success = hexToByte(buffer, dest);
     if (!success) {
         output.print(F("-BAD DATA VALUE: "));
@@ -37,7 +37,7 @@ bool parseData(const char* buffer, byte* dest, Print& output) {
     return success;
 }
 
-bool parseDataBlock(const char* buffer, byte* dest, int bytes, Print& output) {
+bool parseDataBlock(const char *buffer, byte *dest, int bytes, Print &output) {
     for (int i = 0; i < bytes; i++) {
         if (!parseData(buffer + (2 * i), dest + i, output)) {
             return false;
@@ -46,8 +46,8 @@ bool parseDataBlock(const char* buffer, byte* dest, int bytes, Print& output) {
     return true;
 }
 
-bool parseSparseDataBlock(const char* buffer, SparsePageElement* dest,
-                          int* countDest, int bytes, Print& output) {
+bool parseSparseDataBlock(const char *buffer, SparsePageElement *dest,
+                          int *countDest, int bytes, Print &output) {
     *countDest = 0;
     for (int i = 0; i < bytes; i++) {
         if (buffer[2 * i] == '.' && buffer[2 * i + 1] == '.') {
@@ -67,7 +67,7 @@ bool parseSparseDataBlock(const char* buffer, SparsePageElement* dest,
     return true;
 }
 
-bool validateLength(int actual, int expected, Print& output) {
+bool validateLength(int actual, int expected, Print &output) {
     if (actual != expected) {
         output.print(F("-ILLEGAL COMMAND LENGTH. EXPECTED "));
         output.print(expected);
@@ -79,8 +79,8 @@ bool validateLength(int actual, int expected, Print& output) {
     return true;
 }
 
-bool validateChar(const char* args, int position, char expected,
-                  Print& output) {
+bool validateChar(const char *args, int position, char expected,
+                  Print &output) {
     if (args[position] != expected) {
         output.print(F("-UNEXPECTED CHARACTER "));
         output.print(args[position]);
@@ -93,37 +93,38 @@ bool validateChar(const char* args, int position, char expected,
     return true;
 }
 
-void sendWriteResult(WriteResult& result, Print& output) {
+void sendWriteResult(WriteResult &result, Print &output) {
     if (result.success) {
         output.println('+');
     } else {
         output.print(F("-WRITE CHECK ERROR: ADDRESS "));
-        printAddress(result.error_address, output);
+        printAddress(result.error.error_address, output);
         output.print(F(" EXPECTED "));
-        printData(result.error_expected, output);
+        printData(result.error.error_expected, output);
         output.print(F(" BUT READ "));
-        printData(result.error_actual, output);
+        printData(result.error.error_actual, output);
         output.println();
     }
 }
 
-CommandExecutor::CommandExecutor(Print& output) : output(output) {};
+CommandExecutor::CommandExecutor(Print &output) : output(output) {
+};
 
-void CommandExecutor::lock(const char* args, int len) {
+void CommandExecutor::lock(int len) {
     if (validateLength(len, 0, output)) {
         ops::lockSDP();
         output.println('+');
     }
 }
 
-void CommandExecutor::unlock(const char* args, int len) {
+void CommandExecutor::unlock(int len) {
     if (validateLength(len, 0, output)) {
         ops::unlockSDP();
         output.println('+');
     }
 }
 
-void printTypeResult(ChipType type, Print& output) {
+void printTypeResult(ChipType type, Print &output) {
     switch (type) {
         case SMALL_SOCKET:
             output.println(F("+SS"));
@@ -137,7 +138,7 @@ void printTypeResult(ChipType type, Print& output) {
     }
 }
 
-void CommandExecutor::identifyType(const char* args, int len) {
+void CommandExecutor::identifyType(const char *args, int len) {
     if (validateLength(len, 0, output)) {
         ChipType size;
         WriteResult result = ops::identifyType(&size);
@@ -149,7 +150,7 @@ void CommandExecutor::identifyType(const char* args, int len) {
     }
 }
 
-void CommandExecutor::read(const char* args, int len) {
+void CommandExecutor::read(const char *args, int len) {
     address adr;
     if (validateLength(len, 4, output) &&
         parseAddress(args, &adr, false, output)) {
@@ -160,7 +161,7 @@ void CommandExecutor::read(const char* args, int len) {
     }
 }
 
-void CommandExecutor::write(const char* args, int len) {
+void CommandExecutor::write(const char *args, int len) {
     address adr;
     byte data;
     if (validateLength(len, 7, output) &&
@@ -172,7 +173,7 @@ void CommandExecutor::write(const char* args, int len) {
     }
 }
 
-void CommandExecutor::pageRead(const char* args, int len) {
+void CommandExecutor::pageRead(const char *args, int len) {
     address adr;
     if (validateLength(len, 4, output) &&
         parseAddress(args, &adr, true, output)) {
@@ -186,7 +187,7 @@ void CommandExecutor::pageRead(const char* args, int len) {
     }
 }
 
-void CommandExecutor::pageWrite(const char* args, int len) {
+void CommandExecutor::pageWrite(const char *args, int len) {
     address adr;
     byte data[64];
     if (validateLength(len, 133, output) &&
@@ -198,7 +199,7 @@ void CommandExecutor::pageWrite(const char* args, int len) {
     }
 }
 
-void CommandExecutor::pageSparseWrite(const char* args, int len) {
+void CommandExecutor::pageSparseWrite(const char *args, int len) {
     address adr;
     SparsePageElement elements[64];
     int nelements;

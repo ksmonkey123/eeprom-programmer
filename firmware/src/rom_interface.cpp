@@ -1,4 +1,4 @@
-#include "rom_interface.h"
+#include "../include/rom_interface.h"
 
 #include "status_indicator.h"
 
@@ -13,7 +13,7 @@
 #define OUTPUT_ENABLE_PIN 11
 #define WRITE_ENABLE_PIN 12
 
-void startAccess() {
+static void startAccess() {
     leds::setActiveIndicator(true);
     PAGE_BUS_D = 0x7f;
     ADDRESS_BUS_D = 0xff;
@@ -31,20 +31,20 @@ void startAccess() {
     digitalWrite(OUTPUT_ENABLE_PIN, false);
 }
 
-void endAccess() {
+static void endAccess() {
     digitalWrite(OUTPUT_ENABLE_PIN, true);
     digitalWrite(CHIP_ENABLE_PIN, true);
     leds::setActiveIndicator(false);
 }
 
-void startWriteCycle() {
+static void startWriteCycle() {
     leds::setWriteIndicator(true);
     digitalWrite(OUTPUT_ENABLE_PIN, true);
     DATA_BUS_D = 0xff;
     DATA_BUS_O = 0x00;
 }
 
-void endWriteCycle() {
+static void endWriteCycle() {
     // we need a delay at the end of a write cycle to let the chip finish up.
     delay(10);
     DATA_BUS_D = 0x00;

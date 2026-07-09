@@ -1,5 +1,4 @@
 #pragma once
-#include <Arduino.h>
 
 namespace leds {
 void setActiveIndicator(bool state);

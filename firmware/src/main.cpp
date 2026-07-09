@@ -1,8 +1,6 @@
-#include "command_executor.h"
+#include "../include/command_executor.h"
 #include "common.h"
 #include "communications.h"
-#include "operations.h"
-#include "utils.h"
 
 #define ADDRESS_BUS_O PORTF
 #define ADDRESS_BUS_D DDRF
@@ -14,31 +12,29 @@
 #define DATA_BUS_I PINK
 #define DATA_BUS_D DDRK
 
-#define CHIP_ENABLE_PIN 10
-#define OUTPUT_ENABLE_PIN 11
-#define WRITE_ENABLE_PIN 12
+void setup() {
+    // no special init
+}
 
-void setup() {}
-
-void loop() {
+__attribute__((noreturn)) void loop() {
     static char buffer[134];
 
     Communications comms(Serial);
-    Print& output = comms.getOutput();
+    Print &output = comms.getOutput();
     CommandExecutor cmd(output);
 
     while (true) {
         int length = comms.receiveNextCommand(buffer, 134);
 
-        char* args = buffer + 1;
+        char const *args = buffer + 1;
         int len = length - 1;
 
         switch (buffer[0]) {
             case 'l':
-                cmd.lock(args, len);
+                cmd.lock(len);
                 break;
             case 'u':
-                cmd.unlock(args, len);
+                cmd.unlock(len);
                 break;
             case 'r':
                 cmd.read(args, len);

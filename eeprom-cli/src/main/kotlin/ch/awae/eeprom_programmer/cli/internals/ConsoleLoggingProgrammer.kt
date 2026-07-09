@@ -26,14 +26,6 @@ class ConsoleLoggingProgrammer(val backer: Programmer) : Programmer {
 
     }
 
-    override fun readPage(address: Int): ByteArray {
-        return backer.readPage(address)
-    }
-
-    override fun writePage(address: Int, data: ByteArray, startFrom: Int) {
-        backer.writePage(address, data, startFrom)
-    }
-
     override fun dumpMemory(type: ChipType, progressCallback: () -> Unit): ByteArray {
         val progress = SteppedProgressBar(64, type.size / 64)
         print("reading chip $progress")

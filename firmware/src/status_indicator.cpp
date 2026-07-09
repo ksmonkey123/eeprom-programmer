@@ -1,4 +1,5 @@
-#include "status_indicator.h"
+#include "../include/status_indicator.h"
+#include <Arduino.h>
 
 #define CHIP_ENABLE_LED 32
 #define WRITE_LED 31

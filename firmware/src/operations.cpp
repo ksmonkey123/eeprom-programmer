@@ -1,20 +1,22 @@
-#include "operations.h"
+#include "../include/operations.h"
 
 #include "rom_interface.h"
 
 WriteResult createError(address address, byte expected, byte actual) {
-    WriteResult error;
-    error.success = false;
-    error.error_address = address;
-    error.error_expected = expected;
-    error.error_actual = actual;
-    return error;
+    return WriteResult{
+        .success = false,
+        .error = {
+            .error_address = address,
+            .error_expected = expected,
+            .error_actual = actual,
+        }
+    };
 }
 
 WriteResult createSuccess() {
-    WriteResult result;
-    result.success = true;
-    return result;
+    return WriteResult{
+        .success = true,
+    };
 }
 
 byte ops::byteRead(address address) {
@@ -36,7 +38,7 @@ WriteResult ops::byteWrite(address address, byte data) {
     }
 }
 
-void ops::pageRead(address address, byte* dest) {
+void ops::pageRead(address address, byte *dest) {
     RomInterface interface;
 
     for (byte i = 0; i < 64; i++) {
@@ -44,7 +46,7 @@ void ops::pageRead(address address, byte* dest) {
     }
 }
 
-WriteResult ops::pageWrite(address address, const byte* data) {
+WriteResult ops::pageWrite(address address, const byte *data) {
     RomInterface interface;
 
     for (int i = 0; i < 64; i++) {
@@ -62,7 +64,7 @@ WriteResult ops::pageWrite(address address, const byte* data) {
 }
 
 WriteResult ops::pageSparseWrite(address address,
-                                 const SparsePageElement* elements,
+                                 const SparsePageElement *elements,
                                  int nelements) {
     RomInterface interface;
 
@@ -100,11 +102,11 @@ void ops::unlockSDP() {
     interface.write(0x5555, 0x20);
 }
 
-WriteResult ops::identifyType(ChipType* dest) {
+WriteResult ops::identifyType(ChipType *dest) {
     RomInterface interface;
     byte readback;
 
-    address adr = random(0x0000, 0x2000);
+    auto adr = static_cast<address>(random(0x0000, 0x2000));
     byte data = interface.read(adr);
     byte inverse = ~data;
 

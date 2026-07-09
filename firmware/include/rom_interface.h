@@ -4,13 +4,14 @@
 enum RomInterfaceState { IDLE, READ, WRITE };
 
 class RomInterface {
-   private:
     RomInterfaceState state;
 
-   public:
-    RomInterface();
+public:
+    explicit RomInterface();
+
     ~RomInterface();
 
     byte read(address address);
+
     void write(address address, byte data);
 };
