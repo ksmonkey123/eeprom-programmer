@@ -1,14 +1,14 @@
 #include "../include/communications.h"
 #include "../include/status_indicator.h"
 
-void initCommunications(HardwareSerial &serial) {
+static void initCommunications(HardwareSerial &serial) {
     serial.begin(230400);
     leds::indicateConnected();
 }
 
-int consumeUntilNextLineBreak(HardwareSerial &serial);
+static int consumeUntilNextLineBreak(HardwareSerial &serial);
 
-char readNextCharBlocking(HardwareSerial &serial);
+static char readNextCharBlocking(HardwareSerial &serial);
 
 Communications::Communications(HardwareSerial &channel) : channel(channel) {
     initCommunications(channel);
@@ -69,7 +69,7 @@ int Communications::receiveNextCommand(char *buffer, int limit) {
 }
 
 // helper functions
-char readNextCharBlocking(HardwareSerial &serial) {
+static char readNextCharBlocking(HardwareSerial &serial) {
     while (true) {
         if (serial.available() == 0) {
             // use idle time waiting on new data for seeding the RNG
@@ -88,7 +88,7 @@ char readNextCharBlocking(HardwareSerial &serial) {
     }
 }
 
-int consumeUntilNextLineBreak(HardwareSerial &serial) {
+static int consumeUntilNextLineBreak(HardwareSerial &serial) {
     int counter = 1;
     while (true) {
         char c = readNextCharBlocking(serial);

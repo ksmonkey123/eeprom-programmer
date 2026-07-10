@@ -2,7 +2,7 @@
 
 #include "rom_interface.h"
 
-WriteResult createError(address address, byte expected, byte actual) {
+static WriteResult createError(address address, byte expected, byte actual) {
     return WriteResult{
         .success = false,
         .error = {
@@ -13,7 +13,7 @@ WriteResult createError(address address, byte expected, byte actual) {
     };
 }
 
-WriteResult createSuccess() {
+static WriteResult createSuccess() {
     return WriteResult{
         .success = true,
     };

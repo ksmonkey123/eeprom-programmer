@@ -1,6 +1,6 @@
 #include "../include/utils.h"
 
-byte hexCharToHalfByte(char input) {
+static byte hexCharToHalfByte(char input) {
     switch (input) {
         case '0':
             return 0;

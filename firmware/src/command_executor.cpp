@@ -3,8 +3,8 @@
 #include "../include/operations.h"
 #include "../include/utils.h"
 
-bool parseAddress(const char *buffer, address *dest, bool pageAddress,
-                  Print &output) {
+static bool parseAddress(const char *buffer, address *dest, bool pageAddress,
+                         Print &output) {
     bool success = hexToAddress(buffer, dest);
     // bad address format
     if (!success) {
@@ -27,7 +27,7 @@ bool parseAddress(const char *buffer, address *dest, bool pageAddress,
     return true;
 }
 
-bool parseData(const char *buffer, byte *dest, Print &output) {
+static bool parseData(const char *buffer, byte *dest, Print &output) {
     bool success = hexToByte(buffer, dest);
     if (!success) {
         output.print(F("-BAD DATA VALUE: "));
@@ -37,7 +37,7 @@ bool parseData(const char *buffer, byte *dest, Print &output) {
     return success;
 }
 
-bool parseDataBlock(const char *buffer, byte *dest, int bytes, Print &output) {
+static bool parseDataBlock(const char *buffer, byte *dest, int bytes, Print &output) {
     for (int i = 0; i < bytes; i++) {
         if (!parseData(buffer + (2 * i), dest + i, output)) {
             return false;
@@ -46,8 +46,8 @@ bool parseDataBlock(const char *buffer, byte *dest, int bytes, Print &output) {
     return true;
 }
 
-bool parseSparseDataBlock(const char *buffer, SparsePageElement *dest,
-                          int *countDest, int bytes, Print &output) {
+static bool parseSparseDataBlock(const char *buffer, SparsePageElement *dest,
+                                 int *countDest, int bytes, Print &output) {
     *countDest = 0;
     for (int i = 0; i < bytes; i++) {
         if (buffer[2 * i] == '.' && buffer[2 * i + 1] == '.') {
@@ -67,7 +67,7 @@ bool parseSparseDataBlock(const char *buffer, SparsePageElement *dest,
     return true;
 }
 
-bool validateLength(int actual, int expected, Print &output) {
+static bool validateLength(int actual, int expected, Print &output) {
     if (actual != expected) {
         output.print(F("-ILLEGAL COMMAND LENGTH. EXPECTED "));
         output.print(expected);
@@ -79,8 +79,8 @@ bool validateLength(int actual, int expected, Print &output) {
     return true;
 }
 
-bool validateChar(const char *args, int position, char expected,
-                  Print &output) {
+static bool validateChar(const char *args, int position, char expected,
+                         Print &output) {
     if (args[position] != expected) {
         output.print(F("-UNEXPECTED CHARACTER "));
         output.print(args[position]);
@@ -93,7 +93,7 @@ bool validateChar(const char *args, int position, char expected,
     return true;
 }
 
-void sendWriteResult(WriteResult &result, Print &output) {
+static void sendWriteResult(WriteResult &result, Print &output) {
     if (result.success) {
         output.println('+');
     } else {
@@ -108,7 +108,7 @@ void sendWriteResult(WriteResult &result, Print &output) {
 }
 
 CommandExecutor::CommandExecutor(Print &output) : output(output) {
-};
+}
 
 void CommandExecutor::lock(int len) {
     if (validateLength(len, 0, output)) {

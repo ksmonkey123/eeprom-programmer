@@ -2,7 +2,6 @@
 #include <HardwareSerial.h>
 
 class Communications {
-private:
     HardwareSerial &channel;
 
 public:
