@@ -42,7 +42,7 @@ class JscComDevice(comPort: SerialPort) : ComDevice {
                 } while (received != string)
                 // we have the correct SYN packet -> finish sync
                 return
-            } catch (e: SerialPortTimeoutException) {
+            } catch (_: SerialPortTimeoutException) {
                 System.err.println("Timeout")
             }
         }
@@ -57,7 +57,7 @@ class JscComDevice(comPort: SerialPort) : ComDevice {
         if (response.startsWith('+')) {
             return response.substring(1).takeUnless { it.isEmpty() }
         } else {
-            throw IllegalStateException("bad response: $response")
+            error("bad response: $response")
         }
     }
 

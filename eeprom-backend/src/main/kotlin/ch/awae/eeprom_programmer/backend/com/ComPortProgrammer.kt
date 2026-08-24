@@ -43,8 +43,8 @@ class ComPortProgrammer(private val comDevice: ComDevice) : Programmer {
     }
 
     fun flashChip(type: ChipType, data: ByteArray, progressCallback: () -> Unit) {
-        if (data.size > type.size) throw IllegalArgumentException("bad data size. ${type.size} bytes expected")
-        if (data.size % 64 != 0) throw IllegalArgumentException("bad data size. must be page aligned")
+        require(data.size <= type.size) { "bad data size. ${type.size} bytes expected" }
+        require(data.size % 64 == 0) { "bad data size. must be page aligned" }
 
         for (i in data.indices.step(64)) {
             writePage(i, data, i)
@@ -53,7 +53,7 @@ class ComPortProgrammer(private val comDevice: ComDevice) : Programmer {
     }
 
     override fun flashChip(type: ChipType, file: BinaryFile, progressCallback: (ProgressReport) -> Unit) {
-        if (file.currentSize > type.size) throw IllegalArgumentException("file size (${file.currentSize} bytes) exceeds chip capacity (${type.size} bytes)")
+        require(file.currentSize <= type.size) { "file size (${file.currentSize} bytes) exceeds chip capacity (${type.size} bytes)" }
 
         val fragments = file.fragments(64).toList()
         fragments.forEachIndexed { i, fragment ->
@@ -76,24 +76,16 @@ class ComPortProgrammer(private val comDevice: ComDevice) : Programmer {
         comDevice.sendCommand(sb.toString())
     }
 
-    private fun <T> Iterator<T>.toList(): List<T> {
-        val list = mutableListOf<T>()
-        while (hasNext()) {
-            list.add(next())
-        }
-        return list
-    }
-
     override fun eraseChip(type: ChipType, progressCallback: () -> Unit) {
         flashChip(type, ByteArray(type.size) { -1 }, progressCallback)
     }
 
     override fun lockChip() {
-        comDevice.sendCommand("l");
+        comDevice.sendCommand("l")
     }
 
     override fun unlockChip() {
-        comDevice.sendCommand("u");
+        comDevice.sendCommand("u")
     }
 
     override fun identifyType(): ChipType {

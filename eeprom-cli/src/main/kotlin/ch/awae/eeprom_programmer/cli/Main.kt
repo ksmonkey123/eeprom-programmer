@@ -1,8 +1,7 @@
-package ch.awae.eeprom_programmer.cli_app
+package ch.awae.eeprom_programmer.cli
 
 import ch.awae.eeprom_programmer.backend.api.*
 import ch.awae.eeprom_programmer.backend.com.*
-import ch.awae.eeprom_programmer.cli.*
 import picocli.*
 import kotlin.system.*
 
