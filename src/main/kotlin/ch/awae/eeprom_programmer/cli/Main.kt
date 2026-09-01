@@ -9,5 +9,5 @@ import kotlin.system.*
 fun createProgrammer(): Programmer = ComDeviceProgrammer(JscComDevice.findAndConnect())
 
 fun main(args: Array<String>) {
-    exitProcess(CommandLine(EepromCLI(::createProgrammer)).setCaseInsensitiveEnumValuesAllowed(true).execute(*args))
+    exitProcess(EepromCLI.initCLI(::createProgrammer).execute(*args))
 }

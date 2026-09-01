@@ -1,16 +1,20 @@
 package ch.awae.eeprom_programmer.cli.commands
 
-import ch.awae.binfiles.*
-import ch.awae.binfiles.hex.*
+import ch.awae.binfiles.BinaryFile
+import ch.awae.binfiles.hex.HexFileWriter
+import ch.awae.eeprom_programmer.cli.EepromCLI
+import ch.awae.eeprom_programmer.cli.internals.ConsoleLoggingProgrammer
 import ch.awae.eeprom_programmer.programmer.ChipType
-import ch.awae.eeprom_programmer.cli.*
-import ch.awae.eeprom_programmer.cli.internals.*
 import picocli.CommandLine.*
-import java.io.*
-import java.nio.file.*
+import picocli.CommandLine.Model.CommandSpec
+import java.io.File
+import java.nio.file.Files
 
 @Command(name = "dump", description = ["read the entire EEPROM and write the contents to disk"])
 class DumpCommand : Runnable {
+
+    @Spec
+    lateinit var spec: CommandSpec
 
     @ParentCommand
     lateinit var cli: EepromCLI
@@ -19,7 +23,8 @@ class DumpCommand : Runnable {
     lateinit var file: File
 
     override fun run() {
-        val programmer = ConsoleLoggingProgrammer(cli.programmerFactory())
+        val out = spec.commandLine().out
+        val programmer = ConsoleLoggingProgrammer(cli.programmerFactory(), out)
 
         if (cli.options.unlock) {
             programmer.unlockChip()
@@ -31,7 +36,7 @@ class DumpCommand : Runnable {
         val contents = programmer.dumpMemory(assumedType)
 
 
-        print("post-processing data...")
+        out.print("post-processing data...")
         val output = if (type == null) {
             postProcessContents(contents)
         } else {
@@ -42,13 +47,13 @@ class DumpCommand : Runnable {
         output.forEachIndexed { index, value ->
             file.addByte(index, value)
         }
-        print(" ok\n")
+        out.print(" ok\n")
 
-        print("writing to ${this.file.canonicalPath}...")
+        out.print("writing to ${this.file.canonicalPath}...")
         HexFileWriter(Files.newOutputStream(this.file.toPath())).use {
             it.write(file)
         }
-        print(" ok\ndone\n")
+        out.print(" ok\ndone\n")
     }
 
     private fun postProcessContents(buffer: ByteArray): ByteArray {

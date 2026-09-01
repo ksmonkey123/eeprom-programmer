@@ -1,14 +1,18 @@
 package ch.awae.eeprom_programmer.cli.commands
 
-import ch.awae.binfiles.hex.*
-import ch.awae.eeprom_programmer.cli.*
-import ch.awae.eeprom_programmer.cli.internals.*
+import ch.awae.binfiles.hex.HexFileReader
+import ch.awae.eeprom_programmer.cli.EepromCLI
+import ch.awae.eeprom_programmer.cli.internals.ConsoleLoggingProgrammer
 import picocli.CommandLine.*
-import java.io.*
-import java.nio.file.*
+import picocli.CommandLine.Model.CommandSpec
+import java.io.File
+import java.nio.file.Files
 
 @Command(name = "flash", description = ["write a binary file to the EEPROM"])
 class FlashCommand : Runnable {
+
+    @Spec
+    lateinit var spec: CommandSpec
 
     @ParentCommand
     lateinit var cli: EepromCLI
@@ -20,19 +24,20 @@ class FlashCommand : Runnable {
     lateinit var file: File
 
     override fun run() {
+        val out = spec.commandLine().out
         if (!file.canRead()) {
-            print("ERROR: file ${file.canonicalPath} cannot be read or does not exist!\n")
+            out.print("ERROR: file ${file.canonicalPath} cannot be read or does not exist!\n")
             return
         }
 
-        print("reading file ${file.canonicalPath}...")
+        out.print("reading file ${file.canonicalPath}...")
         val file = HexFileReader(Files.newInputStream(file.toPath())).use { reader ->
             reader.read()!!
         }
 
-        print(" ${file.currentSize} bytes\n")
+        out.print(" ${file.currentSize} bytes\n")
 
-        val programmer = ConsoleLoggingProgrammer(cli.programmerFactory())
+        val programmer = ConsoleLoggingProgrammer(cli.programmerFactory(), out)
 
         if (cli.options.unlock) {
             programmer.unlockChip()
@@ -52,6 +57,6 @@ class FlashCommand : Runnable {
             programmer.lockChip()
         }
 
-        print("done\n")
+        out.print("done\n")
     }
 }

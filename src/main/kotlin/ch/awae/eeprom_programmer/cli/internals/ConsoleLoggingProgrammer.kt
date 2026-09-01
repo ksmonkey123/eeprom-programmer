@@ -5,59 +5,60 @@ import ch.awae.binfiles.BinaryFile
 import ch.awae.eeprom_programmer.programmer.ChipType
 import ch.awae.eeprom_programmer.programmer.Programmer
 import ch.awae.eeprom_programmer.programmer.ProgressReport
+import java.io.PrintWriter
 
-class ConsoleLoggingProgrammer(val backer: Programmer) : Programmer {
+class ConsoleLoggingProgrammer(val backer: Programmer, val out: PrintWriter = PrintWriter(System.out)) : Programmer {
 
     override fun dumpMemory(type: ChipType, progressCallback: (ProgressReport) -> Unit): ByteArray {
         val progress = ProgressBar(64)
-        print("reading chip $progress")
+        out.print("reading chip $progress")
         val contents = backer.dumpMemory(type) {
             progress.set(it)
-            print("\rreading chip $progress")
+            out.print("\rreading chip $progress")
             progressCallback(it)
         }
-        println()
+        out.println()
         return contents
     }
 
     override fun flashChip(type: ChipType, file: BinaryFile, progressCallback: (ProgressReport) -> Unit) {
         val progress = ProgressBar(64)
-        print("writing chip...")
+        out.print("writing chip...")
         backer.flashChip(type, file) {
             progress.set(it)
-            print("\rwriting chip $progress")
+            out.print("\rwriting chip $progress")
             progressCallback(it)
         }
-        println()
+        out.println()
     }
 
     override fun eraseChip(type: ChipType, progressCallback: (ProgressReport) -> Unit) {
         val progress = ProgressBar(64)
-        print("erasing chip $progress")
+        out.print("erasing chip $progress")
         backer.eraseChip(type) {
             progress.set(it)
-            print("\rerasing chip $progress")
+            out.print("\rerasing chip $progress")
             progressCallback(it)
         }
-        println()
+        out.println()
     }
 
     override fun lockChip() {
-        print("locking chip...")
+        out.print("locking chip...")
         backer.lockChip()
-        print(" ok\n")
+        out.print(" ok\n")
     }
 
     override fun unlockChip() {
-        print("unlocking chip...")
+        out.print("unlocking chip...")
         backer.unlockChip()
-        print(" ok\n")
+        out.print(" ok\n")
     }
 
     override fun identifyType(): ChipType {
-        print("determining chip type...")
+        out.print("determining chip type...")
         val type = backer.identifyType()
-        print(" ok\n")
+        out.print(" ok\n")
         return type
     }
 
