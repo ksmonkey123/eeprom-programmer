@@ -78,7 +78,7 @@ class ComDeviceProgrammerTest {
         val device = mockk<ComDevice>()
         every { device.sendCommand(any()) } answers {
             val cmd = args[0] as String
-            require(cmd.startsWith("p"))
+            require(cmd.startsWith("r"))
             val address = cmd.substring(1).toInt(16)
             val slice = expectedData.sliceArray(address until address + 64)
             val sb = StringBuilder()
@@ -113,7 +113,7 @@ class ComDeviceProgrammerTest {
         val programmer = ComDeviceProgrammer(device)
         programmer.eraseChip(type)
 
-        val expected = (0..<type.size / 64).map { "s${(it * 64).hex(4)}:" + "FF".repeat(64) }
+        val expected = (0..<type.size / 64).map { "w${(it * 64).hex(4)}:" + "FF".repeat(64) }
 
         assertEquals(expected, capture)
     }
@@ -140,9 +140,9 @@ class ComDeviceProgrammerTest {
         programmer.flashChip(ChipType.AT28C64B, file)
 
         val expected = listOf(
-            "s0000:FFFEFDFCFBFAF9F8F7F6F5F4F3F2F1F0EFEEEDECEBEAE9E8E7E6E5E4E3E2E1E0DFDEDDDCDBDAD9D8D7D6D5D4D3D2D1D0CFCECDCCCBCAC9C8C7C6C5C4C3C2C1C0",
-            "s0040:0102............................................................................................................................",
-            "s0040:..............................................................................................................................03",
+            "w0000:FFFEFDFCFBFAF9F8F7F6F5F4F3F2F1F0EFEEEDECEBEAE9E8E7E6E5E4E3E2E1E0DFDEDDDCDBDAD9D8D7D6D5D4D3D2D1D0CFCECDCCCBCAC9C8C7C6C5C4C3C2C1C0",
+            "w0040:0102............................................................................................................................",
+            "w0040:..............................................................................................................................03",
         )
 
         assertEquals(expected, capture)
@@ -172,7 +172,7 @@ class ComDeviceProgrammerTest {
 
         programmer.flashChip(ChipType.AT28C256, file)
 
-        verify(exactly = 1) { device.sendCommand("s2000:01..............................................................................................................................") }
+        verify(exactly = 1) { device.sendCommand("w2000:01..............................................................................................................................") }
         confirmVerified(device)
     }
 
