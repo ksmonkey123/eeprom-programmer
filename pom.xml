@@ -8,22 +8,35 @@
         <version>4.1.1</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>ch.awae.eeprom-programmer</groupId>
-    <artifactId>project-repo</artifactId>
-    <version>2.0-SNAPSHOT</version>
-    <packaging>pom</packaging>
+    <groupId>ch.awae</groupId>
+    <artifactId>eeprom-programmer</artifactId>
+    <version>3.0-SNAPSHOT</version>
 
     <properties>
         <java.version>25</java.version>
         <kotlin.version>2.4.0</kotlin.version>
     </properties>
 
-    <modules>
-        <module>eeprom-backend</module>
-        <module>eeprom-cli</module>
-    </modules>
-
     <dependencies>
+        <!-- picoCLI -->
+        <dependency>
+            <groupId>info.picocli</groupId>
+            <artifactId>picocli</artifactId>
+            <version>4.7.7</version>
+        </dependency>
+        <!-- jSerialComm - Serial Port Backend -->
+        <dependency>
+            <groupId>com.fazecast</groupId>
+            <artifactId>jSerialComm</artifactId>
+            <version>2.11.4</version>
+        </dependency>
+        <!-- Intel Hex File Support Library -->
+        <dependency>
+            <groupId>ch.awae</groupId>
+            <artifactId>binfiles</artifactId>
+            <version>0.2.0</version>
+        </dependency>
+        <!-- Kotlin default libs -->
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-reflect</artifactId>
@@ -37,13 +50,13 @@
             <artifactId>kotlin-test-junit5</artifactId>
             <scope>test</scope>
         </dependency>
-
     </dependencies>
 
     <build>
         <sourceDirectory>${project.basedir}/src/main/kotlin</sourceDirectory>
         <testSourceDirectory>${project.basedir}/src/test/kotlin</testSourceDirectory>
         <plugins>
+            <!-- Kotlin Compiler -->
             <plugin>
                 <groupId>org.jetbrains.kotlin</groupId>
                 <artifactId>kotlin-maven-plugin</artifactId>
@@ -63,23 +76,12 @@
                     </dependency>
                 </dependencies>
             </plugin>
+            <!-- Spring Boot Plugin: Automatically Build Runnable JAR -->
             <plugin>
-                <groupId>com.github.danielflower.mavenplugins</groupId>
-                <artifactId>multi-module-maven-release-plugin</artifactId>
-                <version>3.8.0</version>
-                <configuration>
-                    <noChangesAction>ReleaseAll</noChangesAction>
-                    <pushTags>false</pushTags>
-                    <pullTags>false</pullTags>
-                    <releaseGoals>
-                        <releaseGoal>clean</releaseGoal>
-                        <releaseGoal>deploy</releaseGoal>
-                    </releaseGoals>
-                    <releaseProfiles>
-                        <releaseProfile>docker</releaseProfile>
-                    </releaseProfiles>
-                </configuration>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
+
         </plugins>
     </build>
 
