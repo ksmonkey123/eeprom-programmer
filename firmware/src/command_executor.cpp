@@ -37,15 +37,6 @@ static bool parseData(const char *buffer, byte *dest, Print &output) {
     return success;
 }
 
-static bool parseDataBlock(const char *buffer, byte *dest, int bytes, Print &output) {
-    for (int i = 0; i < bytes; i++) {
-        if (!parseData(buffer + (2 * i), dest + i, output)) {
-            return false;
-        }
-    }
-    return true;
-}
-
 static bool parseSparseDataBlock(const char *buffer, SparsePageElement *dest,
                                  int *countDest, int bytes, Print &output) {
     *countDest = 0;
@@ -150,29 +141,6 @@ void CommandExecutor::identifyType(const char *args, int len) {
     }
 }
 
-void CommandExecutor::read(const char *args, int len) {
-    address adr;
-    if (validateLength(len, 4, output) &&
-        parseAddress(args, &adr, false, output)) {
-        byte data = ops::byteRead(adr);
-        output.print('+');
-        printData(data, output);
-        output.println();
-    }
-}
-
-void CommandExecutor::write(const char *args, int len) {
-    address adr;
-    byte data;
-    if (validateLength(len, 7, output) &&
-        parseAddress(args, &adr, false, output) &&
-        validateChar(args, 4, ':', output) &&
-        parseData(args + 5, &data, output)) {
-        WriteResult result = ops::byteWrite(adr, data);
-        sendWriteResult(result, output);
-    }
-}
-
 void CommandExecutor::pageRead(const char *args, int len) {
     address adr;
     if (validateLength(len, 4, output) &&
@@ -189,18 +157,6 @@ void CommandExecutor::pageRead(const char *args, int len) {
 
 void CommandExecutor::pageWrite(const char *args, int len) {
     address adr;
-    byte data[64];
-    if (validateLength(len, 133, output) &&
-        parseAddress(args, &adr, true, output) &&
-        validateChar(args, 4, ':', output) &&
-        parseDataBlock(args + 5, data, 64, output)) {
-        WriteResult result = ops::pageWrite(adr, data);
-        sendWriteResult(result, output);
-    }
-}
-
-void CommandExecutor::pageSparseWrite(const char *args, int len) {
-    address adr;
     SparsePageElement elements[64];
     int nelements;
 
@@ -208,7 +164,7 @@ void CommandExecutor::pageSparseWrite(const char *args, int len) {
         parseAddress(args, &adr, true, output) &&
         validateChar(args, 4, ':', output) &&
         parseSparseDataBlock(args + 5, elements, &nelements, 64, output)) {
-        WriteResult result = ops::pageSparseWrite(adr, elements, nelements);
+        WriteResult result = ops::pageWrite(adr, elements, nelements);
         sendWriteResult(result, output);
     }
 }

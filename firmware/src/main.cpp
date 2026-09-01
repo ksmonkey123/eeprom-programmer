@@ -37,19 +37,10 @@ __attribute__((noreturn)) void loop() {
                 cmd.unlock(len);
                 break;
             case 'r':
-                cmd.read(args, len);
-                break;
-            case 'w':
-                cmd.write(args, len);
-                break;
-            case 'p':
                 cmd.pageRead(args, len);
                 break;
-            case 'x':
+            case 'w':
                 cmd.pageWrite(args, len);
-                break;
-            case 's':
-                cmd.pageSparseWrite(args, len);
                 break;
             case 'i':
                 cmd.identifyType(args, len);

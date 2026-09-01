@@ -19,24 +19,6 @@ static WriteResult createSuccess() {
     };
 }
 
-byte ops::byteRead(address address) {
-    RomInterface interface;
-
-    return interface.read(address);
-}
-
-WriteResult ops::byteWrite(address address, byte data) {
-    RomInterface interface;
-
-    interface.write(address, data);
-    byte readback = interface.read(address);
-
-    if (readback != data) {
-        return createError(address, data, readback);
-    } else {
-        return createSuccess();
-    }
-}
 
 void ops::pageRead(address address, byte *dest) {
     RomInterface interface;
@@ -46,24 +28,7 @@ void ops::pageRead(address address, byte *dest) {
     }
 }
 
-WriteResult ops::pageWrite(address address, const byte *data) {
-    RomInterface interface;
-
-    for (int i = 0; i < 64; i++) {
-        interface.write(address + i, data[i]);
-    }
-
-    // verify
-    for (int i = 0; i < 64; i++) {
-        byte readback = interface.read(address + i);
-        if (data[i] != readback) {
-            return createError(address + i, data[i], readback);
-        }
-    }
-    return createSuccess();
-}
-
-WriteResult ops::pageSparseWrite(address address,
+WriteResult ops::pageWrite(address address,
                                  const SparsePageElement *elements,
                                  int nelements) {
     RomInterface interface;

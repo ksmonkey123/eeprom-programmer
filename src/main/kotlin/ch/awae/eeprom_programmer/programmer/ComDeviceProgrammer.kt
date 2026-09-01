@@ -10,7 +10,7 @@ class ComDeviceProgrammer(private val comDevice: ComDevice) : Programmer {
     private fun readPage(address: Int): ByteArray {
         require(address % 64 == 0) { "address must be start of a page" }
 
-        val result = comDevice.sendCommand("p${address.hex(4)}")
+        val result = comDevice.sendCommand("r${address.hex(4)}")
             ?: error("read command expects a response")
 
         return result.chunked(2)
@@ -45,7 +45,7 @@ class ComDeviceProgrammer(private val comDevice: ComDevice) : Programmer {
         val offset = fragment.position and 0x003f
         val endPadding = 64 - (fragment.length + offset)
 
-        val sb = StringBuilder("s${address.hex(4)}:")
+        val sb = StringBuilder("w${address.hex(4)}:")
 
         sb.append("..".repeat(offset))
         sb.append(HexFormat.of().withUpperCase().formatHex(fragment.data))

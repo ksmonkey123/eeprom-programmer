@@ -19,15 +19,9 @@ struct SparsePageElement {
 enum ChipType { SMALL_SOCKET, LARGE_SOCKET };
 
 namespace ops {
-    byte byteRead(address address);
-
-    WriteResult byteWrite(address address, byte data);
-
     void pageRead(address address, byte *dest);
 
-    WriteResult pageWrite(address address, const byte *data);
-
-    WriteResult pageSparseWrite(address address, const SparsePageElement *elements, int nelements);
+    WriteResult pageWrite(address address, const SparsePageElement *elements, int nelements);
 
     void lockSDP();
 
