@@ -1,5 +1,6 @@
 package ch.awae.eeprom_programmer.serial
 
+import ch.awae.eeprom_programmer.programmer.ComDevice
 import com.fazecast.jSerialComm.SerialPort
 import com.fazecast.jSerialComm.SerialPortTimeoutException
 import java.io.BufferedReader

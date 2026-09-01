@@ -1,4 +1,4 @@
-package ch.awae.eeprom_programmer.backend
+package ch.awae.eeprom_programmer.programmer
 
 import ch.awae.binfiles.*
 

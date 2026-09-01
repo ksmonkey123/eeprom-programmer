@@ -1,6 +1,6 @@
 package ch.awae.eeprom_programmer.cli
 
-import ch.awae.eeprom_programmer.backend.ChipType
+import ch.awae.eeprom_programmer.programmer.ChipType
 import picocli.CommandLine.*
 
 class WriteOptions {

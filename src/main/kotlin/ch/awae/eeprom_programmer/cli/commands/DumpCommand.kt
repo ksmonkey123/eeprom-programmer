@@ -2,7 +2,7 @@ package ch.awae.eeprom_programmer.cli.commands
 
 import ch.awae.binfiles.*
 import ch.awae.binfiles.hex.*
-import ch.awae.eeprom_programmer.backend.ChipType
+import ch.awae.eeprom_programmer.programmer.ChipType
 import ch.awae.eeprom_programmer.cli.*
 import ch.awae.eeprom_programmer.cli.internals.*
 import picocli.CommandLine.*

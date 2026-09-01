@@ -1,16 +1,14 @@
-package ch.awae.eeprom_programmer.serial
+package ch.awae.eeprom_programmer.programmer
 
 import ch.awae.binfiles.BinaryFile
 import ch.awae.binfiles.DataFragment
-import ch.awae.eeprom_programmer.backend.ChipType
-import ch.awae.eeprom_programmer.backend.Programmer
-import ch.awae.eeprom_programmer.backend.ProgressReport
+import ch.awae.eeprom_programmer.serial.hex
 import java.util.*
 
-class ComPortProgrammer(private val comDevice: ComDevice) : Programmer {
+class ComDeviceProgrammer(private val comDevice: ComDevice) : Programmer {
 
     fun readPage(address: Int): ByteArray {
-        if (address % 64 != 0) throw java.lang.IllegalArgumentException("address must be start of a page")
+        require(address % 64 == 0) { "address must be start of a page" }
 
         val result = comDevice.sendCommand("p${address.hex(4)}")
             ?: throw NullPointerException("read command expects a response")

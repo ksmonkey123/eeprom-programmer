@@ -1,6 +1,6 @@
 package ch.awae.eeprom_programmer.cli
 
-import ch.awae.eeprom_programmer.backend.Programmer
+import ch.awae.eeprom_programmer.programmer.Programmer
 import ch.awae.eeprom_programmer.cli.commands.*
 import picocli.CommandLine.*
 

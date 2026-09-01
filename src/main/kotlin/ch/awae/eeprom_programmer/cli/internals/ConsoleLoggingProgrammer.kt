@@ -2,9 +2,9 @@ package ch.awae.eeprom_programmer.cli.internals
 
 
 import ch.awae.binfiles.BinaryFile
-import ch.awae.eeprom_programmer.backend.ChipType
-import ch.awae.eeprom_programmer.backend.Programmer
-import ch.awae.eeprom_programmer.backend.ProgressReport
+import ch.awae.eeprom_programmer.programmer.ChipType
+import ch.awae.eeprom_programmer.programmer.Programmer
+import ch.awae.eeprom_programmer.programmer.ProgressReport
 
 class ConsoleLoggingProgrammer(val backer: Programmer) : Programmer by backer {
 

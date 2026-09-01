@@ -1,4 +1,4 @@
-package ch.awae.eeprom_programmer.backend
+package ch.awae.eeprom_programmer.programmer
 
 enum class ChipType(val size: Int, val title: String) {
     AT28C64B(8 * 1024, "AT28C64B (Socket)"),
