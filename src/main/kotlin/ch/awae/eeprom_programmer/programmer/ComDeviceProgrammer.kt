@@ -7,7 +7,7 @@ import java.util.*
 
 class ComDeviceProgrammer(private val comDevice: ComDevice) : Programmer {
 
-    fun readPage(address: Int): ByteArray {
+    private fun readPage(address: Int): ByteArray {
         require(address % 64 == 0) { "address must be start of a page" }
 
         val result = comDevice.sendCommand("p${address.hex(4)}")
@@ -18,7 +18,7 @@ class ComDeviceProgrammer(private val comDevice: ComDevice) : Programmer {
             .toByteArray()
     }
 
-    fun writePage(address: Int, data: ByteArray, startFrom: Int) {
+    private fun writePage(address: Int, data: ByteArray, startFrom: Int) {
         require(address % 64 == 0) { "address must be start of a page" }
         require(data.size < 64 + startFrom) { "less than 64 bytes provided" }
 
@@ -90,11 +90,9 @@ class ComDeviceProgrammer(private val comDevice: ComDevice) : Programmer {
     }
 
     override fun identifyType(): ChipType {
-        return when (val result = comDevice.sendCommand("i")) {
-            "SS" -> ChipType.AT28C64B
-            "LS" -> ChipType.AT28C256
-            else -> throw IllegalArgumentException("bad test response: $result")
-        }
+        val identifier = comDevice.sendCommand("i")
+        return ChipType.entries.find { it.internalIdentifier == identifier }
+            ?: error("bad test response: $identifier")
     }
 
     override fun rawCommand(command: String): String? {
