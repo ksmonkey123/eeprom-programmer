@@ -2,7 +2,7 @@ package ch.awae.eeprom_programmer.programmer
 
 import ch.awae.binfiles.BinaryFile
 import ch.awae.binfiles.DataFragment
-import ch.awae.eeprom_programmer.serial.hex
+import ch.awae.eeprom_programmer.hex
 import java.util.*
 
 class ComDeviceProgrammer(private val comDevice: ComDevice) : Programmer {
@@ -11,46 +11,23 @@ class ComDeviceProgrammer(private val comDevice: ComDevice) : Programmer {
         require(address % 64 == 0) { "address must be start of a page" }
 
         val result = comDevice.sendCommand("p${address.hex(4)}")
-            ?: throw NullPointerException("read command expects a response")
+            ?: error("read command expects a response")
 
         return result.chunked(2)
             .map { it.toInt(16).toByte() }
             .toByteArray()
     }
 
-    private fun writePage(address: Int, data: ByteArray, startFrom: Int) {
-        require(address % 64 == 0) { "address must be start of a page" }
-        require(data.size < 64 + startFrom) { "less than 64 bytes provided" }
-
-        val sb = StringBuilder("x${address.hex(4)}:")
-
-        for (i in 0..63) {
-            sb.append(data[startFrom + i].hex())
-        }
-
-        comDevice.sendCommand(sb.toString())
-    }
-
-    override fun dumpMemory(type: ChipType, progressCallback: () -> Unit): ByteArray {
+    override fun dumpMemory(type: ChipType, progressCallback: (ProgressReport) -> Unit): ByteArray {
         val dump = ByteArray(type.size)
 
         for (page in (0..<type.size).step(64)) {
             val pageContent = readPage(page)
             pageContent.copyInto(dump, destinationOffset = page)
-            progressCallback()
+            progressCallback(ProgressReport(page + 1, type.size / 64))
         }
 
         return dump
-    }
-
-    private fun flashChip(type: ChipType, data: ByteArray, progressCallback: () -> Unit) {
-        require(data.size <= type.size) { "bad data size. ${type.size} bytes expected" }
-        require(data.size % 64 == 0) { "bad data size. must be page aligned" }
-
-        for (i in data.indices.step(64)) {
-            writePage(i, data, i)
-            progressCallback()
-        }
     }
 
     override fun flashChip(type: ChipType, file: BinaryFile, progressCallback: (ProgressReport) -> Unit) {
@@ -77,8 +54,8 @@ class ComDeviceProgrammer(private val comDevice: ComDevice) : Programmer {
         comDevice.sendCommand(sb.toString())
     }
 
-    override fun eraseChip(type: ChipType, progressCallback: () -> Unit) {
-        flashChip(type, ByteArray(type.size) { -1 }, progressCallback)
+    override fun eraseChip(type: ChipType, progressCallback: (ProgressReport) -> Unit) {
+        flashChip(type, BinaryFile(ByteArray(type.size) { -1 }), progressCallback)
     }
 
     override fun lockChip() {

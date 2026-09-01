@@ -1,14 +1,11 @@
-package ch.awae.eeprom_programmer.serial
+package ch.awae.eeprom_programmer
 
 fun Int.hex(width: Int): String {
     val sb = StringBuilder(width)
-
-    var remaining = this
     for (i in 0 until width) {
-        sb.append(nibbleHexLookup(remaining and 0xF))
-        remaining = remaining shr 4
+        val slice = this.shr(4 * (width - i - 1))
+        sb.append(nibbleHexLookup(slice and 0xf))
     }
-
     return sb.toString()
 }
 

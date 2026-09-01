@@ -8,56 +8,36 @@ import ch.awae.eeprom_programmer.programmer.ProgressReport
 
 class ConsoleLoggingProgrammer(val backer: Programmer) : Programmer {
 
-    private class SteppedProgressBar(val width: Int, var limit: Int) {
-        private var state = 0
-
-        fun step() {
-            state++
-        }
-
-        fun set(value: Int, limit: Int) {
-            state = value
-            this.limit = limit
-        }
-
-        override fun toString(): String {
-            val filled = if (limit > 0) (state * width) / limit else 0
-            val empty = width - filled
-            return "[" + "|".repeat(filled) + " ".repeat(empty) + "] $state/$limit"
-        }
-
-    }
-
-    override fun dumpMemory(type: ChipType, progressCallback: () -> Unit): ByteArray {
-        val progress = SteppedProgressBar(64, type.size / 64)
+    override fun dumpMemory(type: ChipType, progressCallback: (ProgressReport) -> Unit): ByteArray {
+        val progress = ProgressBar(64)
         print("reading chip $progress")
         val contents = backer.dumpMemory(type) {
-            progress.step()
+            progress.set(it)
             print("\rreading chip $progress")
-            progressCallback()
+            progressCallback(it)
         }
         println()
         return contents
     }
 
     override fun flashChip(type: ChipType, file: BinaryFile, progressCallback: (ProgressReport) -> Unit) {
-        val progress = SteppedProgressBar(64, 0)
+        val progress = ProgressBar(64)
         print("writing chip...")
         backer.flashChip(type, file) {
-            progress.set(it.progress, it.total)
+            progress.set(it)
             print("\rwriting chip $progress")
             progressCallback(it)
         }
         println()
     }
 
-    override fun eraseChip(type: ChipType, progressCallback: () -> Unit) {
-        val progress = SteppedProgressBar(64, type.size / 64)
+    override fun eraseChip(type: ChipType, progressCallback: (ProgressReport) -> Unit) {
+        val progress = ProgressBar(64)
         print("erasing chip $progress")
         backer.eraseChip(type) {
-            progress.step()
+            progress.set(it)
             print("\rerasing chip $progress")
-            progressCallback()
+            progressCallback(it)
         }
         println()
     }
@@ -82,3 +62,4 @@ class ConsoleLoggingProgrammer(val backer: Programmer) : Programmer {
     }
 
 }
+

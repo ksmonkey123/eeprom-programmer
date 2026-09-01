@@ -1,6 +1,6 @@
 package ch.awae.eeprom_programmer.programmer
 
-import ch.awae.binfiles.*
+import ch.awae.binfiles.BinaryFile
 
 interface Programmer {
 
@@ -9,7 +9,7 @@ interface Programmer {
      *
      * @param progressCallback is called after every 64-byte block.
      */
-    fun dumpMemory(type: ChipType, progressCallback: () -> Unit = {}): ByteArray
+    fun dumpMemory(type: ChipType, progressCallback: (ProgressReport) -> Unit = {}): ByteArray
 
     /**
      * Writes a [BinaryFile] to the chip.
@@ -23,12 +23,11 @@ interface Programmer {
      *
      * @param progressCallback is called after every 64-byte block.
      */
-    fun eraseChip(type: ChipType, progressCallback: () -> Unit = {})
+    fun eraseChip(type: ChipType, progressCallback: (ProgressReport) -> Unit = {})
 
     fun lockChip()
 
     fun unlockChip()
 
     fun identifyType(): ChipType
-
 }
