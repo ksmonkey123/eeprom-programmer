@@ -31,6 +31,4 @@ interface Programmer {
 
     fun identifyType(): ChipType
 
-    fun rawCommand(command: String): String?
-
 }

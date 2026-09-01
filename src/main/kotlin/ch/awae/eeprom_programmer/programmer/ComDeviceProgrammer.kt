@@ -43,7 +43,7 @@ class ComDeviceProgrammer(private val comDevice: ComDevice) : Programmer {
         return dump
     }
 
-    fun flashChip(type: ChipType, data: ByteArray, progressCallback: () -> Unit) {
+    private fun flashChip(type: ChipType, data: ByteArray, progressCallback: () -> Unit) {
         require(data.size <= type.size) { "bad data size. ${type.size} bytes expected" }
         require(data.size % 64 == 0) { "bad data size. must be page aligned" }
 
@@ -93,10 +93,6 @@ class ComDeviceProgrammer(private val comDevice: ComDevice) : Programmer {
         val identifier = comDevice.sendCommand("i")
         return ChipType.entries.find { it.internalIdentifier == identifier }
             ?: error("bad test response: $identifier")
-    }
-
-    override fun rawCommand(command: String): String? {
-        return comDevice.sendCommand(command)
     }
 
 }

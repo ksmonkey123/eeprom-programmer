@@ -6,7 +6,7 @@ import ch.awae.eeprom_programmer.programmer.ChipType
 import ch.awae.eeprom_programmer.programmer.Programmer
 import ch.awae.eeprom_programmer.programmer.ProgressReport
 
-class ConsoleLoggingProgrammer(val backer: Programmer) : Programmer by backer {
+class ConsoleLoggingProgrammer(val backer: Programmer) : Programmer {
 
     private class SteppedProgressBar(val width: Int, var limit: Int) {
         private var state = 0

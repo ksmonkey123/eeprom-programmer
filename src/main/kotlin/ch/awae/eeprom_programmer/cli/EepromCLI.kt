@@ -13,7 +13,6 @@ import picocli.CommandLine.*
         UnlockCommand::class,
         DumpCommand::class,
         FlashCommand::class,
-        ShellCommand::class,
     ]
 )
 class EepromCLI(
