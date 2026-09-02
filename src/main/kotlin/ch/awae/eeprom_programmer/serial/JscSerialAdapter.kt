@@ -16,7 +16,8 @@ object JscSerialAdapter {
         port.setComPortTimeouts(SerialPort.TIMEOUT_NONBLOCKING, 0, 0)
 
         val comDevice = SerialComDevice {
-            port.writeBytes(it, it.size)
+            val bytes = (it + "\n").toByteArray(Charsets.UTF_8)
+            port.writeBytes(bytes, bytes.size)
         }
 
         port.addDataListener(object : SerialPortDataListener {

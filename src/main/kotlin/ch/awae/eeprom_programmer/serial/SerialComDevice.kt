@@ -5,20 +5,26 @@ import java.nio.CharBuffer
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
 
-class SerialComDevice(val writer: (ByteArray) -> Unit) : ComDevice {
+class SerialComDevice(val writer: (String) -> Unit) : ComDevice {
+
+    private enum class State {
+        IDLE, SYNCHRONIZED, INVALID
+    }
 
     @Volatile
-    private var isSynchronized = false
+    private var state = State.IDLE
 
     @Volatile
     private var future: CompletableFuture<Result<String?>>? = null
 
     private fun synchronize() {
+        if (state != State.IDLE) return
         repeat(100) {
-            writeLine("SYN")
+            writer("SYN")
             Thread.sleep(10)
-            if (isSynchronized) return
+            if (state != State.IDLE) return
         }
+        state = State.INVALID
         error("synchronization failed")
     }
 
@@ -26,25 +32,20 @@ class SerialComDevice(val writer: (ByteArray) -> Unit) : ComDevice {
     override fun sendCommand(command: String): String? {
         synchronize()
 
+        if (state == State.INVALID) error("device invalid due to previous failure")
+
         if (future != null) error("command already in progress")
 
         val future = CompletableFuture<Result<String?>>()
         this.future = future
 
-        writeLine(command)
+        writer(command)
         try {
             return future.get(10, TimeUnit.SECONDS).getOrThrow()
         } finally {
             // clean up the future
             this.future = null
         }
-    }
-
-    private val LINE_BREAK_ARRAY = byteArrayOf(0x0a)
-
-    private fun writeLine(string: String) {
-        writer(string.toByteArray(Charsets.UTF_8))
-        writer(LINE_BREAK_ARRAY)
     }
 
     fun onDataReceived(data: ByteArray) {
@@ -57,7 +58,6 @@ class SerialComDevice(val writer: (ByteArray) -> Unit) : ComDevice {
         when (val c = byte.toUByte().toInt().toChar()) {
             '\r' -> return
             '\n' -> {
-                receiveBuffer
                 val line = receiveBuffer.flip().toString()
                 receiveBuffer.clear()
                 handleLine(line)
@@ -68,16 +68,23 @@ class SerialComDevice(val writer: (ByteArray) -> Unit) : ComDevice {
     }
 
     private fun handleLine(line: String) {
+        if (state == State.INVALID) {
+            error("device invalid due to previous failure")
+        }
+
         // SYN_ACKs (*) can arrive at any time
         if (line == "*") {
-            isSynchronized = true
+            state = State.SYNCHRONIZED
             return
         }
 
         // if not yet synchronized, we treat everything we read as garbage
-        if (!isSynchronized) return
+        if (state == State.IDLE) return
 
-        val future = future ?: error("received unexpected line: $line")
+        val future = future ?: run {
+            state = State.INVALID
+            error("received unexpected line: $line")
+        }
 
         // we are synchronized, now we can process the actual line
         val completed = if (line.first() == '+') {
@@ -88,6 +95,7 @@ class SerialComDevice(val writer: (ByteArray) -> Unit) : ComDevice {
         }
 
         if (!completed) {
+            state = State.INVALID
             error("received unexpected line: $line")
         }
     }
