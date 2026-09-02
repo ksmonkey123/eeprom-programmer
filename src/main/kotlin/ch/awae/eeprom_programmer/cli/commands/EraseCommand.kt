@@ -35,6 +35,7 @@ class EraseCommand : Runnable {
         }
 
         out.println("done")
+        out.flush()
     }
 
 }

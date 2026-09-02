@@ -21,6 +21,7 @@ class LockCommand : Runnable {
         programmer.lockChip()
 
         out.println("done")
+        out.flush()
     }
 
 }

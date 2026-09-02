@@ -27,6 +27,7 @@ class FlashCommand : Runnable {
         val out = spec.commandLine().out
         if (!file.canRead()) {
             out.println("ERROR: file ${file.canonicalPath} cannot be read or does not exist!")
+            out.flush()
             return
         }
 
@@ -37,6 +38,7 @@ class FlashCommand : Runnable {
         }
 
         out.println(" ${file.currentSize} bytes")
+        out.flush()
 
         val programmer = ConsoleLoggingProgrammer(cli.programmerFactory(), out)
 
@@ -59,5 +61,6 @@ class FlashCommand : Runnable {
         }
 
         out.println("done")
+        out.flush()
     }
 }

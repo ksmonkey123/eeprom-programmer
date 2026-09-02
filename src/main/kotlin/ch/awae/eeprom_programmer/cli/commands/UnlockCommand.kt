@@ -20,11 +20,13 @@ class UnlockCommand : Runnable {
 
         if (cli.options.lock) {
             out.println("WARNING: lock option is set but will be ignored!")
+            out.flush()
         }
 
         programmer.unlockChip()
 
         out.println("done")
+        out.flush()
     }
 
 }

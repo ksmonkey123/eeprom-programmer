@@ -49,6 +49,7 @@ class DumpCommand : Runnable {
             file.addByte(index, value)
         }
         out.println(" ok")
+        out.flush()
 
         out.print("writing to ${this.file.canonicalPath}...")
         out.flush()
@@ -56,6 +57,7 @@ class DumpCommand : Runnable {
             it.write(file)
         }
         out.println(" ok\ndone")
+        out.flush()
     }
 
     private fun postProcessContents(buffer: ByteArray): ByteArray {

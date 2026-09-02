@@ -20,6 +20,7 @@ class ConsoleLoggingProgrammer(val backer: Programmer, val out: PrintWriter = Pr
             progressCallback(it)
         }
         out.println()
+        out.flush()
         return contents
     }
 
@@ -34,6 +35,7 @@ class ConsoleLoggingProgrammer(val backer: Programmer, val out: PrintWriter = Pr
             progressCallback(it)
         }
         out.println()
+        out.flush()
     }
 
     override fun eraseChip(type: ChipType, progressCallback: (ProgressReport) -> Unit) {
@@ -47,6 +49,7 @@ class ConsoleLoggingProgrammer(val backer: Programmer, val out: PrintWriter = Pr
             progressCallback(it)
         }
         out.println()
+        out.flush()
     }
 
     override fun lockChip() {
@@ -54,6 +57,7 @@ class ConsoleLoggingProgrammer(val backer: Programmer, val out: PrintWriter = Pr
         out.flush()
         backer.lockChip()
         out.println(" ok")
+        out.flush()
     }
 
     override fun unlockChip() {
@@ -61,6 +65,7 @@ class ConsoleLoggingProgrammer(val backer: Programmer, val out: PrintWriter = Pr
         out.flush()
         backer.unlockChip()
         out.println(" ok")
+        out.flush()
     }
 
     override fun identifyType(): ChipType {
@@ -68,6 +73,7 @@ class ConsoleLoggingProgrammer(val backer: Programmer, val out: PrintWriter = Pr
         out.flush()
         val type = backer.identifyType()
         out.println(" ${type.title}")
+        out.flush()
         return type
     }
 
