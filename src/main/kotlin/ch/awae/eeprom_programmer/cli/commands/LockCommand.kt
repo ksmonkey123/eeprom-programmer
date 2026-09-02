@@ -2,6 +2,7 @@ package ch.awae.eeprom_programmer.cli.commands
 
 import ch.awae.eeprom_programmer.cli.EepromCLI
 import ch.awae.eeprom_programmer.cli.internals.ConsoleLoggingProgrammer
+import ch.awae.eeprom_programmer.unwrapLogged
 import picocli.CommandLine.*
 import picocli.CommandLine.Model.CommandSpec
 
@@ -18,7 +19,7 @@ class LockCommand : Runnable {
         val out = spec.commandLine().out
         val programmer = ConsoleLoggingProgrammer(cli.programmerFactory(out), out)
 
-        programmer.lockChip()
+        programmer.lockChip().unwrapLogged(out)
 
         out.println("done")
         out.flush()

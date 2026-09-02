@@ -1,7 +1,8 @@
 package ch.awae.eeprom_programmer.cli.commands
 
-import ch.awae.eeprom_programmer.cli.*
-import ch.awae.eeprom_programmer.cli.internals.*
+import ch.awae.eeprom_programmer.cli.EepromCLI
+import ch.awae.eeprom_programmer.cli.internals.ConsoleLoggingProgrammer
+import ch.awae.eeprom_programmer.unwrapLogged
 import picocli.CommandLine.*
 import picocli.CommandLine.Model.CommandSpec
 
@@ -21,17 +22,17 @@ class EraseCommand : Runnable {
         var type = cli.options.sizeSelection?.type()
 
         if (cli.options.unlock) {
-            programmer.unlockChip()
+            programmer.unlockChip().unwrapLogged(out)
         }
 
         if (type == null) {
-            type = programmer.identifyType()
+            type = programmer.identifyType().unwrapLogged(out)
         }
 
-        programmer.eraseChip(type)
+        programmer.eraseChip(type).unwrapLogged(out)
 
         if (cli.options.lock) {
-            programmer.lockChip()
+            programmer.lockChip().unwrapLogged(out)
         }
 
         out.println("done")

@@ -2,6 +2,7 @@ package ch.awae.eeprom_programmer.cli.commands
 
 import ch.awae.eeprom_programmer.cli.EepromCLI
 import ch.awae.eeprom_programmer.cli.internals.ConsoleLoggingProgrammer
+import ch.awae.eeprom_programmer.unwrapLogged
 import picocli.CommandLine.*
 import picocli.CommandLine.Model.CommandSpec
 
@@ -23,7 +24,7 @@ class UnlockCommand : Runnable {
             out.flush()
         }
 
-        programmer.unlockChip()
+        programmer.unlockChip().unwrapLogged(out)
 
         out.println("done")
         out.flush()

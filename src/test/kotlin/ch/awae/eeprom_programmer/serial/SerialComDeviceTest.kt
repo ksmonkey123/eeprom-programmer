@@ -6,6 +6,7 @@ import org.junit.jupiter.api.assertThrows
 import java.util.*
 import kotlin.concurrent.thread
 import kotlin.test.assertEquals
+import kotlin.test.assertIs
 import kotlin.test.assertTrue
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
@@ -36,7 +37,7 @@ class SerialComDeviceTest {
         }
 
         // command fails
-        assertTrue(result.value.isFailure)
+        assertTrue(result.value.getOrThrow().isFailure)
     }
 
     @Test
@@ -78,7 +79,7 @@ class SerialComDeviceTest {
 
         // command fails
         assertTrue(result.value.isSuccess)
-        assertNull(result.value.getOrThrow())
+        assertNull(result.value.getOrThrow().getOrThrow())
     }
 
     @Test
@@ -122,7 +123,7 @@ class SerialComDeviceTest {
 
         // command fails
         assertTrue(result.value.isSuccess)
-        assertNull(result.value.getOrThrow())
+        assertNull(result.value.getOrThrow().getOrThrow())
     }
 
     @Test
@@ -164,7 +165,7 @@ class SerialComDeviceTest {
 
         // command fails
         assertTrue(result.value.isSuccess)
-        assertEquals("result", result.value.getOrThrow())
+        assertEquals("result", result.value.getOrThrow().getOrThrow())
     }
 
     @Test
@@ -210,7 +211,7 @@ class SerialComDeviceTest {
 
         // command fails
         assertTrue(result.value.isSuccess)
-        assertNull(result.value.getOrThrow())
+        assertNull(result.value.getOrThrow().getOrThrow())
     }
 
     @Test
@@ -245,8 +246,8 @@ class SerialComDeviceTest {
             device.onDataReceived("+result_b\n".toByteArray())
         }
 
-        var resultA: TimedValue<Result<String?>>? = null
-        var resultB: TimedValue<Result<String?>>? = null
+        var resultA: TimedValue<Result<Result<String?>>>? = null
+        var resultB: TimedValue<Result<Result<String?>>>? = null
 
         // thread sends 'cmd_a' immediately
         thread(start = true) {
@@ -288,8 +289,8 @@ class SerialComDeviceTest {
                 assertEquals("cmd_b", string, "expected cmd_b as message $index")
         }
 
-        assertEquals("result_a", resultA.value.getOrThrow())
-        assertEquals("result_b", resultB.value.getOrThrow())
+        assertEquals("result_a", resultA.value.getOrThrow().getOrThrow())
+        assertEquals("result_b", resultB.value.getOrThrow().getOrThrow())
     }
 
     @Test
@@ -342,7 +343,7 @@ class SerialComDeviceTest {
         }
 
         // command fails
-        assertTrue(result.value.isFailure)
+        assertTrue(result.value.getOrThrow().isFailure)
     }
 
     @Test
@@ -365,9 +366,9 @@ class SerialComDeviceTest {
 
         device.sendCommand("test")
         Thread.sleep(100)
-        assertThrows<IllegalStateException> {
-            device.sendCommand("test2")
-        }
+        val result2 = device.sendCommand("test2")
+        assertTrue(result2.isFailure)
+        assertIs<IllegalStateException>(result2.exceptionOrNull())
     }
 
 

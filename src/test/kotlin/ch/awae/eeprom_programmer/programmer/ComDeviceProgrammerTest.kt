@@ -7,19 +7,20 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import kotlin.random.Random
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
+import kotlin.test.assertIs
+import kotlin.test.assertTrue
 
 class ComDeviceProgrammerTest {
 
     @Test
     fun `locking should simply send l`() {
         val device = mockk<ComDevice>()
-        every { device.sendCommand("l") } returns null
+        every { device.sendCommand("l") } returns Result.success(null)
 
         val programmer = ComDeviceProgrammer(device)
 
@@ -32,7 +33,7 @@ class ComDeviceProgrammerTest {
     @Test
     fun `unlocking should simply send u`() {
         val device = mockk<ComDevice>()
-        every { device.sendCommand("u") } returns null
+        every { device.sendCommand("u") } returns Result.success(null)
 
         val programmer = ComDeviceProgrammer(device)
 
@@ -46,12 +47,12 @@ class ComDeviceProgrammerTest {
     @EnumSource(ChipType::class)
     fun `type identification works`(type: ChipType) {
         val device = mockk<ComDevice>()
-        every { device.sendCommand("i") } returns type.internalIdentifier
+        every { device.sendCommand("i") } returns Result.success(type.internalIdentifier)
 
         val programmer = ComDeviceProgrammer(device)
 
         val result = programmer.identifyType()
-        assertEquals(type, result)
+        assertEquals(type, result.getOrThrow())
 
         verify(exactly = 1) { device.sendCommand("i") }
         confirmVerified(device)
@@ -60,11 +61,14 @@ class ComDeviceProgrammerTest {
     @Test
     fun `type identification fails for invalid response`() {
         val device = mockk<ComDevice>()
-        every { device.sendCommand("i") } returns "XX"
+        every { device.sendCommand("i") } returns Result.success("XX")
 
         val programmer = ComDeviceProgrammer(device)
 
-        assertThrows<IllegalStateException> { programmer.identifyType() }
+        val result = programmer.identifyType()
+
+        assertTrue(result.isFailure)
+        assertIs<IllegalStateException>(result.exceptionOrNull())
 
         verify(exactly = 1) { device.sendCommand("i") }
         confirmVerified(device)
@@ -83,25 +87,25 @@ class ComDeviceProgrammerTest {
             val slice = expectedData.sliceArray(address until address + 64)
             val sb = StringBuilder()
             slice.forEach { sb.append(it.hex()) }
-            sb.toString()
+            Result.success(sb.toString())
         }
 
         val programmer = ComDeviceProgrammer(device)
         val result = programmer.dumpMemory(type)
-        assertEquals(type.size, result.size)
-        assertContentEquals(expectedData, result)
+        assertEquals(type.size, result.getOrThrow().size)
+        assertContentEquals(expectedData, result.getOrThrow())
     }
 
     @ParameterizedTest
     @EnumSource(ChipType::class)
     fun `dump memory, invalid response`(type: ChipType) {
         val device = mockk<ComDevice>()
-        every { device.sendCommand(any()) } returns null
+        every { device.sendCommand(any()) } returns Result.success(null)
 
         val programmer = ComDeviceProgrammer(device)
-        assertThrows<IllegalStateException> {
-            programmer.dumpMemory(type)
-        }
+        val result = programmer.dumpMemory(type)
+        assertTrue(result.isFailure)
+        assertIs<IllegalStateException>(result.exceptionOrNull())
     }
 
     @ParameterizedTest
@@ -109,7 +113,7 @@ class ComDeviceProgrammerTest {
     fun `erase chip, every byte is set to 0xff`(type: ChipType) {
         val device = mockk<ComDevice>()
         val capture = mutableListOf<String>()
-        every { device.sendCommand(capture(capture)) } returns null
+        every { device.sendCommand(capture(capture)) } returns Result.success(null)
         val programmer = ComDeviceProgrammer(device)
         programmer.eraseChip(type)
 
@@ -122,7 +126,7 @@ class ComDeviceProgrammerTest {
     fun `write data fragments`() {
         val device = mockk<ComDevice>()
         val capture = mutableListOf<String>()
-        every { device.sendCommand(capture(capture)) } returns null
+        every { device.sendCommand(capture(capture)) } returns Result.success(null)
         val programmer = ComDeviceProgrammer(device)
 
         val file = BinaryFile()
@@ -156,15 +160,15 @@ class ComDeviceProgrammerTest {
         val file = BinaryFile()
         file.addByte(0x2000, 0x01.toByte())
 
-        assertThrows<IllegalArgumentException> {
-            programmer.flashChip(ChipType.AT28C64B, file)
-        }
+        val result = programmer.flashChip(ChipType.AT28C64B, file)
+        assertTrue(result.isFailure)
+        assertIs<IllegalArgumentException>(result.exceptionOrNull())
     }
 
     @Test
     fun `write large file to large device`() {
         val device = mockk<ComDevice>()
-        every { device.sendCommand(any()) } returns null
+        every { device.sendCommand(any()) } returns Result.success(null)
         val programmer = ComDeviceProgrammer(device)
 
         val file = BinaryFile()

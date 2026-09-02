@@ -10,7 +10,7 @@ class ComDeviceProgrammer(private val comDevice: ComDevice) : Programmer {
     private fun readPage(address: Int): ByteArray {
         require(address % 64 == 0) { "address must be start of a page" }
 
-        val result = comDevice.sendCommand("r${address.hex(4)}")
+        val result = comDevice.sendCommand("r${address.hex(4)}").getOrThrow()
             ?: error("read command expects a response")
 
         return result.chunked(2)
@@ -18,25 +18,29 @@ class ComDeviceProgrammer(private val comDevice: ComDevice) : Programmer {
             .toByteArray()
     }
 
-    override fun dumpMemory(type: ChipType, progressCallback: (ProgressReport) -> Unit): ByteArray {
-        val dump = ByteArray(type.size)
+    override fun dumpMemory(type: ChipType, progressCallback: (ProgressReport) -> Unit): Result<ByteArray> {
+        return runCatching {
+            val dump = ByteArray(type.size)
 
-        for (page in (0..<type.size).step(64)) {
-            val pageContent = readPage(page)
-            pageContent.copyInto(dump, destinationOffset = page)
-            progressCallback(ProgressReport(page / 64 + 1, type.size / 64))
+            for (page in (0..<type.size).step(64)) {
+                val pageContent = readPage(page)
+                pageContent.copyInto(dump, destinationOffset = page)
+                progressCallback(ProgressReport(page / 64 + 1, type.size / 64))
+            }
+
+            dump
         }
-
-        return dump
     }
 
-    override fun flashChip(type: ChipType, file: BinaryFile, progressCallback: (ProgressReport) -> Unit) {
-        require(file.currentSize <= type.size) { "file size (${file.currentSize} bytes) exceeds chip capacity (${type.size} bytes)" }
+    override fun flashChip(type: ChipType, file: BinaryFile, progressCallback: (ProgressReport) -> Unit): Result<Unit> {
+        return runCatching {
+            require(file.currentSize <= type.size) { "file size (${file.currentSize} bytes) exceeds chip capacity (${type.size} bytes)" }
 
-        val fragments = file.fragments(64).toList()
-        fragments.forEachIndexed { i, fragment ->
-            writeFragment(fragment)
-            progressCallback(ProgressReport(i + 1, fragments.size))
+            val fragments = file.fragments(64).toList()
+            fragments.forEachIndexed { i, fragment ->
+                writeFragment(fragment)
+                progressCallback(ProgressReport(i + 1, fragments.size))
+            }
         }
     }
 
@@ -54,22 +58,23 @@ class ComDeviceProgrammer(private val comDevice: ComDevice) : Programmer {
         comDevice.sendCommand(sb.toString())
     }
 
-    override fun eraseChip(type: ChipType, progressCallback: (ProgressReport) -> Unit) {
-        flashChip(type, BinaryFile(ByteArray(type.size) { -1 }), progressCallback)
+    override fun eraseChip(type: ChipType, progressCallback: (ProgressReport) -> Unit): Result<Unit> {
+        return flashChip(type, BinaryFile(ByteArray(type.size) { -1 }), progressCallback)
     }
 
-    override fun lockChip() {
-        comDevice.sendCommand("l")
+    override fun lockChip(): Result<Unit> {
+        return comDevice.sendCommand("l").map { }
     }
 
-    override fun unlockChip() {
-        comDevice.sendCommand("u")
+    override fun unlockChip(): Result<Unit> {
+        return comDevice.sendCommand("u").map { }
     }
 
-    override fun identifyType(): ChipType {
-        val identifier = comDevice.sendCommand("i")
-        return ChipType.entries.find { it.internalIdentifier == identifier }
-            ?: error("bad test response: $identifier")
+    override fun identifyType(): Result<ChipType> {
+        return comDevice.sendCommand("i").mapCatching { identifier ->
+            ChipType.entries.find { it.internalIdentifier == identifier }
+                ?: error("bad test response: $identifier")
+        }
     }
 
 }

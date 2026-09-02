@@ -5,6 +5,7 @@ import ch.awae.binfiles.hex.HexFileWriter
 import ch.awae.eeprom_programmer.cli.EepromCLI
 import ch.awae.eeprom_programmer.cli.internals.ConsoleLoggingProgrammer
 import ch.awae.eeprom_programmer.programmer.ChipType
+import ch.awae.eeprom_programmer.unwrapLogged
 import picocli.CommandLine.*
 import picocli.CommandLine.Model.CommandSpec
 import java.io.File
@@ -33,8 +34,7 @@ class DumpCommand : Runnable {
         val type = cli.options.sizeSelection?.type()
         val assumedType = type ?: ChipType.AT28C256
 
-        val contents = programmer.dumpMemory(assumedType)
-
+        val contents = programmer.dumpMemory(assumedType).unwrapLogged(out)
 
         out.print("post-processing data...")
         out.flush()

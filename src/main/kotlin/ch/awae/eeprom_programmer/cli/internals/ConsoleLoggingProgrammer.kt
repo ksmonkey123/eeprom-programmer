@@ -9,7 +9,7 @@ import java.io.PrintWriter
 
 class ConsoleLoggingProgrammer(val backer: Programmer, val out: PrintWriter = PrintWriter(System.out)) : Programmer {
 
-    override fun dumpMemory(type: ChipType, progressCallback: (ProgressReport) -> Unit): ByteArray {
+    override fun dumpMemory(type: ChipType, progressCallback: (ProgressReport) -> Unit): Result<ByteArray> {
         val progress = ProgressBar(64)
         out.print("reading chip $progress")
         out.flush()
@@ -24,57 +24,79 @@ class ConsoleLoggingProgrammer(val backer: Programmer, val out: PrintWriter = Pr
         return contents
     }
 
-    override fun flashChip(type: ChipType, file: BinaryFile, progressCallback: (ProgressReport) -> Unit) {
+    override fun flashChip(type: ChipType, file: BinaryFile, progressCallback: (ProgressReport) -> Unit): Result<Unit> {
         val progress = ProgressBar(64)
         out.print("writing chip...")
         out.flush()
-        backer.flashChip(type, file) {
+        return backer.flashChip(type, file) {
             progress.set(it)
             out.print("\rwriting chip $progress")
             out.flush()
             progressCallback(it)
+        }.also {
+            out.println()
+            out.flush()
         }
-        out.println()
-        out.flush()
     }
 
-    override fun eraseChip(type: ChipType, progressCallback: (ProgressReport) -> Unit) {
+    override fun eraseChip(type: ChipType, progressCallback: (ProgressReport) -> Unit): Result<Unit> {
         val progress = ProgressBar(64)
         out.print("erasing chip $progress")
         out.flush()
-        backer.eraseChip(type) {
+        return backer.eraseChip(type) {
             progress.set(it)
             out.print("\rerasing chip $progress")
             out.flush()
             progressCallback(it)
+        }.also {
+            out.println()
+            out.flush()
         }
-        out.println()
-        out.flush()
     }
 
-    override fun lockChip() {
+    override fun lockChip(): Result<Unit> {
         out.print("locking chip...")
         out.flush()
-        backer.lockChip()
-        out.println(" ok")
-        out.flush()
+        return backer.lockChip().also {
+            it.onSuccess {
+                out.println(" ok")
+                out.flush()
+            }
+            it.onFailure {
+                out.println(" error")
+                out.flush()
+            }
+        }
     }
 
-    override fun unlockChip() {
+    override fun unlockChip(): Result<Unit> {
         out.print("unlocking chip...")
         out.flush()
-        backer.unlockChip()
-        out.println(" ok")
-        out.flush()
+        return backer.unlockChip().also {
+            it.onSuccess {
+                out.println(" ok")
+                out.flush()
+            }
+            it.onFailure {
+                out.println(" error")
+                out.flush()
+            }
+        }
     }
 
-    override fun identifyType(): ChipType {
+    override fun identifyType(): Result<ChipType> {
         out.print("determining chip type...")
         out.flush()
-        val type = backer.identifyType()
-        out.println(" ${type.title}")
-        out.flush()
-        return type
+        return backer.identifyType().also {
+            it.onSuccess {
+                out.println(" ${it.title}")
+                out.flush()
+            }
+            it.onFailure {
+                out.println(" error")
+                out.flush()
+            }
+        }
     }
 
 }

@@ -29,22 +29,24 @@ class SerialComDevice(val writer: (String) -> Unit) : ComDevice {
     }
 
     @Synchronized
-    override fun sendCommand(command: String): String? {
-        synchronize()
+    override fun sendCommand(command: String): Result<String?> {
+        return runCatching {
+            synchronize()
 
-        if (state == State.INVALID) error("device invalid due to previous failure")
+            if (state == State.INVALID) error("device invalid due to previous failure")
 
-        if (future != null) error("command already in progress")
+            if (future != null) error("command already in progress")
 
-        val future = CompletableFuture<Result<String?>>()
-        this.future = future
+            val future = CompletableFuture<Result<String?>>()
+            this.future = future
 
-        writer(command)
-        try {
-            return future.get(10, TimeUnit.SECONDS).getOrThrow()
-        } finally {
-            // clean up the future
-            this.future = null
+            writer(command)
+            try {
+                return future.get(10, TimeUnit.SECONDS)
+            } finally {
+                // clean up the future
+                this.future = null
+            }
         }
     }
 

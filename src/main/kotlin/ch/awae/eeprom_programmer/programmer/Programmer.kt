@@ -9,25 +9,25 @@ interface Programmer {
      *
      * @param progressCallback is called after every 64-byte block.
      */
-    fun dumpMemory(type: ChipType, progressCallback: (ProgressReport) -> Unit = {}): ByteArray
+    fun dumpMemory(type: ChipType, progressCallback: (ProgressReport) -> Unit = {}): Result<ByteArray>
 
     /**
      * Writes a [BinaryFile] to the chip.
      *
      * @param file the data to write.
      */
-    fun flashChip(type: ChipType, file: BinaryFile, progressCallback: (ProgressReport) -> Unit = {})
+    fun flashChip(type: ChipType, file: BinaryFile, progressCallback: (ProgressReport) -> Unit = {}): Result<Unit>
 
     /**
      * Write 0xff to each address
      *
      * @param progressCallback is called after every 64-byte block.
      */
-    fun eraseChip(type: ChipType, progressCallback: (ProgressReport) -> Unit = {})
+    fun eraseChip(type: ChipType, progressCallback: (ProgressReport) -> Unit = {}): Result<Unit>
 
-    fun lockChip()
+    fun lockChip(): Result<Unit>
 
-    fun unlockChip()
+    fun unlockChip(): Result<Unit>
 
-    fun identifyType(): ChipType
+    fun identifyType(): Result<ChipType>
 }

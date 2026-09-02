@@ -23,9 +23,9 @@ class ConsoleLoggingProgrammerTest {
 
     @BeforeEach
     fun setup() {
-        every { backer.lockChip() } returns Unit
-        every { backer.unlockChip() } returns Unit
-        every { backer.identifyType() } returns ChipType.AT28C64B
+        every { backer.lockChip() } returns Result.success(Unit)
+        every { backer.unlockChip() } returns Result.success(Unit)
+        every { backer.identifyType() } returns Result.success(ChipType.AT28C64B)
     }
 
     @Test
@@ -45,9 +45,9 @@ class ConsoleLoggingProgrammerTest {
     @ParameterizedTest
     @EnumSource(ChipType::class)
     fun `identifyType passthrough`(type: ChipType) {
-        every { backer.identifyType() } returns type
+        every { backer.identifyType() } returns Result.success(type)
         val result = subject.identifyType()
-        assertEquals(type, result)
+        assertEquals(type, result.getOrThrow())
         verify(exactly = 1) { backer.identifyType() }
         confirmVerified(backer)
     }
@@ -60,6 +60,7 @@ class ConsoleLoggingProgrammerTest {
             repeat(type.size / 64) {
                 callback(ProgressReport(it + 1, type.size / 64))
             }
+            Result.success(Unit)
         }
 
         var count = 0
@@ -79,13 +80,13 @@ class ConsoleLoggingProgrammerTest {
             repeat(type.size / 64) {
                 callback(ProgressReport(it + 1, type.size / 64))
             }
-            data
+            Result.success(data)
         }
 
         var count = 0
         val result = subject.dumpMemory(type) { count++ }
         assertEquals(type.size / 64, count)
-        assertContentEquals(data, result)
+        assertContentEquals(data, result.getOrThrow())
 
         verify(exactly = 1) { backer.dumpMemory(type, any()) }
         confirmVerified(backer)
@@ -101,6 +102,7 @@ class ConsoleLoggingProgrammerTest {
             repeat(100) { i ->
                 callback(ProgressReport(i + 1, 100))
             }
+            Result.success(Unit)
         }
 
         var count = 0

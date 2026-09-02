@@ -3,6 +3,7 @@ package ch.awae.eeprom_programmer.cli.commands
 import ch.awae.binfiles.hex.HexFileReader
 import ch.awae.eeprom_programmer.cli.EepromCLI
 import ch.awae.eeprom_programmer.cli.internals.ConsoleLoggingProgrammer
+import ch.awae.eeprom_programmer.unwrapLogged
 import picocli.CommandLine.*
 import picocli.CommandLine.Model.CommandSpec
 import java.io.File
@@ -43,21 +44,21 @@ class FlashCommand : Runnable {
         val programmer = ConsoleLoggingProgrammer(cli.programmerFactory(out), out)
 
         if (cli.options.unlock) {
-            programmer.unlockChip()
+            programmer.unlockChip().unwrapLogged(out)
         }
 
-        val type = cli.options.sizeSelection?.type() ?: programmer.identifyType()
+        val type = cli.options.sizeSelection?.type() ?: programmer.identifyType().unwrapLogged(out)
 
         require(file.currentSize <= type.size) { "Cannot write to EEPROM. File too large" }
 
         if (this.erase) {
-            programmer.eraseChip(type)
+            programmer.eraseChip(type).unwrapLogged(out)
         }
 
-        programmer.flashChip(type, file)
+        programmer.flashChip(type, file).unwrapLogged(out)
 
         if (cli.options.lock) {
-            programmer.lockChip()
+            programmer.lockChip().unwrapLogged(out)
         }
 
         out.println("done")

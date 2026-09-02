@@ -29,7 +29,7 @@ class EepromCLITest {
 
     @Test
     fun testLock() {
-        every { programmer.lockChip() } just Runs
+        every { programmer.lockChip() } returns Result.success(Unit)
         cli.execute("lock")
 
         assertEquals("locking chip... ok\ndone\n", output.toString())
@@ -42,7 +42,7 @@ class EepromCLITest {
 
         @Test
         fun testUnlock() {
-            every { programmer.unlockChip() } just Runs
+            every { programmer.unlockChip() } returns Result.success(Unit)
             cli.execute("unlock")
 
             assertEquals("unlocking chip... ok\ndone\n", output.toString())
@@ -52,7 +52,7 @@ class EepromCLITest {
 
         @Test
         fun testUnlockWithLockFlag() {
-            every { programmer.unlockChip() } just Runs
+            every { programmer.unlockChip() } returns Result.success(Unit)
             cli.execute("--lock", "unlock")
 
             assertEquals(
@@ -70,8 +70,8 @@ class EepromCLITest {
         @ParameterizedTest
         @EnumSource(ChipType::class)
         fun testEraseWithoutType(type: ChipType) {
-            every { programmer.identifyType() } returns type
-            every { programmer.eraseChip(type, any()) } just Runs
+            every { programmer.identifyType() } returns Result.success(type)
+            every { programmer.eraseChip(type, any()) } returns Result.success(Unit)
 
             cli.execute("erase")
 
@@ -84,9 +84,9 @@ class EepromCLITest {
         @ParameterizedTest
         @EnumSource(ChipType::class)
         fun testEraseWithoutTypeWithUnlock(type: ChipType) {
-            every { programmer.unlockChip() } just Runs
-            every { programmer.identifyType() } returns type
-            every { programmer.eraseChip(type, any()) } just Runs
+            every { programmer.unlockChip() } returns Result.success(Unit)
+            every { programmer.identifyType() } returns Result.success(type)
+            every { programmer.eraseChip(type, any()) } returns Result.success(Unit)
 
             cli.execute("-u", "erase")
 
@@ -100,9 +100,9 @@ class EepromCLITest {
         @ParameterizedTest
         @EnumSource(ChipType::class)
         fun testEraseWithoutTypeWithLock(type: ChipType) {
-            every { programmer.lockChip() } just Runs
-            every { programmer.identifyType() } returns type
-            every { programmer.eraseChip(type, any()) } just Runs
+            every { programmer.lockChip() } returns Result.success(Unit)
+            every { programmer.identifyType() } returns Result.success(type)
+            every { programmer.eraseChip(type, any()) } returns Result.success(Unit)
 
             cli.execute("-l", "erase")
 
@@ -116,10 +116,10 @@ class EepromCLITest {
         @ParameterizedTest
         @EnumSource(ChipType::class)
         fun testEraseWithoutTypeWithUnlockAndLock(type: ChipType) {
-            every { programmer.unlockChip() } just Runs
-            every { programmer.lockChip() } just Runs
-            every { programmer.identifyType() } returns type
-            every { programmer.eraseChip(type, any()) } just Runs
+            every { programmer.unlockChip() } returns Result.success(Unit)
+            every { programmer.lockChip() } returns Result.success(Unit)
+            every { programmer.identifyType() } returns Result.success(type)
+            every { programmer.eraseChip(type, any()) } returns Result.success(Unit)
 
             cli.execute("-ul", "erase")
 
@@ -133,7 +133,7 @@ class EepromCLITest {
 
         @Test
         fun testEraseWithType() {
-            every { programmer.eraseChip(ChipType.AT28C256, any()) } just Runs
+            every { programmer.eraseChip(ChipType.AT28C256, any()) } returns Result.success(Unit)
 
             cli.execute("--wide", "erase")
 
@@ -144,8 +144,8 @@ class EepromCLITest {
 
         @Test
         fun testEraseWithTypeWithUnlock() {
-            every { programmer.unlockChip() } just Runs
-            every { programmer.eraseChip(ChipType.AT28C64B, any()) } just Runs
+            every { programmer.unlockChip() } returns Result.success(Unit)
+            every { programmer.eraseChip(ChipType.AT28C64B, any()) } returns Result.success(Unit)
 
             cli.execute("-u", "--narrow", "erase")
 
@@ -157,8 +157,8 @@ class EepromCLITest {
 
         @Test
         fun testEraseWithTypeWithLock() {
-            every { programmer.lockChip() } just Runs
-            every { programmer.eraseChip(ChipType.AT28C64B, any()) } just Runs
+            every { programmer.lockChip() } returns Result.success(Unit)
+            every { programmer.eraseChip(ChipType.AT28C64B, any()) } returns Result.success(Unit)
 
             cli.execute("-ln", "erase")
 
@@ -170,9 +170,9 @@ class EepromCLITest {
 
         @Test
         fun testEraseWithTypeWithUnlockAndLock() {
-            every { programmer.unlockChip() } just Runs
-            every { programmer.lockChip() } just Runs
-            every { programmer.eraseChip(ChipType.AT28C256, any()) } just Runs
+            every { programmer.unlockChip() } returns Result.success(Unit)
+            every { programmer.lockChip() } returns Result.success(Unit)
+            every { programmer.eraseChip(ChipType.AT28C256, any()) } returns Result.success(Unit)
 
             cli.execute("-ulw", "erase")
 
