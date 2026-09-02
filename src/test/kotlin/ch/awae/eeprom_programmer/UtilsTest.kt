@@ -1,9 +1,12 @@
 package ch.awae.eeprom_programmer
 
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 
 class UtilsTest {
 
@@ -17,6 +20,19 @@ class UtilsTest {
     @MethodSource("intCombinations")
     fun testIntToHex(value: Int, length: Int, expected: String) {
         assertEquals(expected, value.hex(length))
+    }
+
+    @Test
+    fun testDurationFormat() {
+        assertEquals("0.0s", 0.milliseconds.toFractionalSeconds())
+        assertEquals("0.0s", 5.milliseconds.toFractionalSeconds())
+        assertEquals("0.0s", 50.milliseconds.toFractionalSeconds())
+        assertEquals("0.1s", 123.milliseconds.toFractionalSeconds())
+        assertEquals("1.0s", 1.seconds.toFractionalSeconds())
+        assertEquals("1.0s", (1.seconds + 23.milliseconds).toFractionalSeconds())
+        assertEquals("12.3s", (12.seconds + 345.milliseconds).toFractionalSeconds())
+        assertEquals("75.0s", (75.seconds + 8.milliseconds).toFractionalSeconds())
+        assertEquals("120.0s", 120.seconds.toFractionalSeconds())
     }
 
     companion object {

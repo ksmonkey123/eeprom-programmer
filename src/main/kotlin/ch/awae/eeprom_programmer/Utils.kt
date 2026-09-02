@@ -1,6 +1,11 @@
 package ch.awae.eeprom_programmer
 
 import java.io.PrintWriter
+import kotlin.time.Duration
+
+fun Duration.toFractionalSeconds(): String = toComponents { seconds, nanoseconds ->
+    "%d.%01ds".format(seconds, nanoseconds / 100_000_000)
+}
 
 fun Int.hex(width: Int): String {
     val sb = StringBuilder(width)

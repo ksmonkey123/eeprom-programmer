@@ -9,10 +9,13 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
+import java.io.PrintWriter
+import java.io.StringWriter
 import kotlin.random.Random
 import kotlin.test.assertContentEquals
 
@@ -111,6 +114,30 @@ class ConsoleLoggingProgrammerTest {
 
         verify(exactly = 1) { backer.flashChip(type, file, any()) }
         confirmVerified(backer)
+    }
+
+    @Test
+    fun `output timing format on success`() {
+        val stringWriter = StringWriter()
+        val customSubject = ConsoleLoggingProgrammer(backer, PrintWriter(stringWriter))
+        every { backer.eraseChip(any(), any()) } returns Result.success(Unit)
+
+        customSubject.eraseChip(ChipType.AT28C64B) {}
+
+        val output = stringWriter.toString()
+        assertTrue(output.contains(Regex("""\(\d+\.\ds\) ok""")))
+    }
+
+    @Test
+    fun `output timing format on failure`() {
+        val stringWriter = StringWriter()
+        val customSubject = ConsoleLoggingProgrammer(backer, PrintWriter(stringWriter))
+        every { backer.eraseChip(any(), any()) } returns Result.failure(RuntimeException("fail"))
+
+        customSubject.eraseChip(ChipType.AT28C64B) {}
+
+        val output = stringWriter.toString()
+        assertTrue(output.contains(Regex("""\(\d+\.\ds\) error""")))
     }
 
 }

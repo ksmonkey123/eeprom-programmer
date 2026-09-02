@@ -2,101 +2,87 @@ package ch.awae.eeprom_programmer.cli.internals
 
 
 import ch.awae.binfiles.BinaryFile
+import ch.awae.eeprom_programmer.toFractionalSeconds
 import ch.awae.eeprom_programmer.programmer.ChipType
 import ch.awae.eeprom_programmer.programmer.Programmer
 import ch.awae.eeprom_programmer.programmer.ProgressReport
 import java.io.PrintWriter
+import kotlin.time.measureTimedValue
 
 class ConsoleLoggingProgrammer(val backer: Programmer, val out: PrintWriter = PrintWriter(System.out)) : Programmer {
 
     override fun dumpMemory(type: ChipType, progressCallback: (ProgressReport) -> Unit): Result<ByteArray> {
-        val progress = ProgressBar(64)
-        out.print("reading chip $progress")
-        out.flush()
-        val contents = backer.dumpMemory(type) {
-            progress.set(it)
-            out.print("\rreading chip $progress")
-            out.flush()
-            progressCallback(it)
-        }
-        out.println()
-        out.flush()
-        return contents
+        return runWithProgressReport("reading from chip", progressCallback) { backer.dumpMemory(type, it) }
     }
 
     override fun flashChip(type: ChipType, file: BinaryFile, progressCallback: (ProgressReport) -> Unit): Result<Unit> {
-        val progress = ProgressBar(64)
-        out.print("writing chip...")
-        out.flush()
-        return backer.flashChip(type, file) {
-            progress.set(it)
-            out.print("\rwriting chip $progress")
-            out.flush()
-            progressCallback(it)
-        }.also {
-            out.println()
-            out.flush()
-        }
+        return runWithProgressReport("writing to chip", progressCallback) { backer.flashChip(type, file, it) }
     }
 
     override fun eraseChip(type: ChipType, progressCallback: (ProgressReport) -> Unit): Result<Unit> {
-        val progress = ProgressBar(64)
-        out.print("erasing chip $progress")
-        out.flush()
-        return backer.eraseChip(type) {
-            progress.set(it)
-            out.print("\rerasing chip $progress")
-            out.flush()
-            progressCallback(it)
-        }.also {
-            out.println()
-            out.flush()
-        }
+        return runWithProgressReport("erasing chip", progressCallback) { backer.eraseChip(type, it) }
     }
 
     override fun lockChip(): Result<Unit> {
-        out.print("locking chip...")
-        out.flush()
-        return backer.lockChip().also {
-            it.onSuccess {
-                out.println(" ok")
-                out.flush()
-            }
-            it.onFailure {
-                out.println(" error")
-                out.flush()
-            }
-        }
+        return runWithSimpleReport("locking chip", backer::lockChip)
     }
 
     override fun unlockChip(): Result<Unit> {
-        out.print("unlocking chip...")
-        out.flush()
-        return backer.unlockChip().also {
-            it.onSuccess {
-                out.println(" ok")
-                out.flush()
-            }
-            it.onFailure {
-                out.println(" error")
-                out.flush()
-            }
-        }
+        return runWithSimpleReport("unlocking chip", backer::unlockChip)
     }
 
     override fun identifyType(): Result<ChipType> {
-        out.print("determining chip type...")
+        return runWithSimpleReport("identifying chip type", backer::identifyType, ChipType::title)
+    }
+
+    private fun <T> runWithProgressReport(
+        operationTitle: String,
+        progressCallback: (ProgressReport) -> Unit,
+        implementation: ((ProgressReport) -> Unit) -> Result<T>,
+    ): Result<T> {
+        val progress = ProgressBar(64)
+        out.print("$operationTitle... $progress")
         out.flush()
-        return backer.identifyType().also {
-            it.onSuccess {
-                out.println(" ${it.title}")
+        val (result, timing) = measureTimedValue {
+            implementation {
+                progress.set(it)
+                out.print("\r$operationTitle $progress")
                 out.flush()
-            }
-            it.onFailure {
-                out.println(" error")
-                out.flush()
+                progressCallback(it)
             }
         }
+        result.onSuccess {
+            out.println(" (" + timing.toFractionalSeconds() + ") ok")
+            out.flush()
+        }
+        result.onFailure {
+            out.println(" (" + timing.toFractionalSeconds() + ") error")
+        }
+        return result
+    }
+
+    private fun <T> runWithSimpleReport(
+        operationTitle: String,
+        implementation: () -> Result<T>,
+        resultMapper: (T) -> String? = { null }
+    ): Result<T> {
+        out.print("$operationTitle...")
+        out.flush()
+        val result = implementation()
+        result.onSuccess {
+            val valueString = resultMapper(result.getOrThrow())
+
+            if (valueString != null) {
+                out.println(" $valueString")
+            } else {
+                out.println(" ok")
+            }
+        }
+        result.onFailure {
+            out.println(" error")
+        }
+        out.flush()
+        return result
     }
 
 }
