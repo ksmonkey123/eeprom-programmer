@@ -19,12 +19,12 @@ class UnlockCommand : Runnable {
         val programmer = ConsoleLoggingProgrammer(cli.programmerFactory(), out)
 
         if (cli.options.lock) {
-            out.print("WARNING: lock option is set but will be ignored!\n")
+            out.println("WARNING: lock option is set but will be ignored!")
         }
 
         programmer.unlockChip()
 
-        out.print("done\n")
+        out.println("done")
     }
 
 }

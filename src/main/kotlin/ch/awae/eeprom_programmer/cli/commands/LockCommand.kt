@@ -20,7 +20,7 @@ class LockCommand : Runnable {
 
         programmer.lockChip()
 
-        out.print("done\n")
+        out.println("done")
     }
 
 }

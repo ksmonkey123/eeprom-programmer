@@ -24,7 +24,7 @@ class ComDeviceProgrammer(private val comDevice: ComDevice) : Programmer {
         for (page in (0..<type.size).step(64)) {
             val pageContent = readPage(page)
             pageContent.copyInto(dump, destinationOffset = page)
-            progressCallback(ProgressReport(page + 1, type.size / 64))
+            progressCallback(ProgressReport(page / 64 + 1, type.size / 64))
         }
 
         return dump

@@ -47,13 +47,9 @@ int Communications::receiveNextCommand(char *buffer, int limit) {
         }
 
         // we have a new line, pre-parse command.
-        if (buffer[0] == 'S' && buffer[1] == 'Y' && buffer[2] == 'N' &&
-            buffer[3] == '_' && buffer_length == 6) {
+        if (buffer[0] == 'S' && buffer[1] == 'Y' && buffer[2] == 'N' && buffer_length == 3) {
             // handle sync directly.
-            for (int i = 0; i < 6; i++) {
-                channel.print(buffer[i]);
-            }
-            channel.println();
+            channel.println(F("*"));
             // reset buffer
             buffer_length = 0;
             continue;
@@ -80,7 +76,7 @@ static char readNextCharBlocking(HardwareSerial &serial) {
 
         // we have data (ignore null char and \r)
         const auto c = static_cast<char>(serial.read());
-        if (c == 0 || c == '\r') {
+        if (c == 0 || c == '\r' || c == ' ') {
             continue;
         }
 

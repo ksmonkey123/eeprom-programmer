@@ -37,6 +37,7 @@ class DumpCommand : Runnable {
 
 
         out.print("post-processing data...")
+        out.flush()
         val output = if (type == null) {
             postProcessContents(contents)
         } else {
@@ -47,13 +48,14 @@ class DumpCommand : Runnable {
         output.forEachIndexed { index, value ->
             file.addByte(index, value)
         }
-        out.print(" ok\n")
+        out.println(" ok")
 
         out.print("writing to ${this.file.canonicalPath}...")
+        out.flush()
         HexFileWriter(Files.newOutputStream(this.file.toPath())).use {
             it.write(file)
         }
-        out.print(" ok\ndone\n")
+        out.println(" ok\ndone")
     }
 
     private fun postProcessContents(buffer: ByteArray): ByteArray {

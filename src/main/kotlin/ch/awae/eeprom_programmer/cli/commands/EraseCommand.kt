@@ -34,7 +34,7 @@ class EraseCommand : Runnable {
             programmer.lockChip()
         }
 
-        out.print("done\n")
+        out.println("done")
     }
 
 }

@@ -12,9 +12,11 @@ class ConsoleLoggingProgrammer(val backer: Programmer, val out: PrintWriter = Pr
     override fun dumpMemory(type: ChipType, progressCallback: (ProgressReport) -> Unit): ByteArray {
         val progress = ProgressBar(64)
         out.print("reading chip $progress")
+        out.flush()
         val contents = backer.dumpMemory(type) {
             progress.set(it)
             out.print("\rreading chip $progress")
+            out.flush()
             progressCallback(it)
         }
         out.println()
@@ -24,9 +26,11 @@ class ConsoleLoggingProgrammer(val backer: Programmer, val out: PrintWriter = Pr
     override fun flashChip(type: ChipType, file: BinaryFile, progressCallback: (ProgressReport) -> Unit) {
         val progress = ProgressBar(64)
         out.print("writing chip...")
+        out.flush()
         backer.flashChip(type, file) {
             progress.set(it)
             out.print("\rwriting chip $progress")
+            out.flush()
             progressCallback(it)
         }
         out.println()
@@ -35,9 +39,11 @@ class ConsoleLoggingProgrammer(val backer: Programmer, val out: PrintWriter = Pr
     override fun eraseChip(type: ChipType, progressCallback: (ProgressReport) -> Unit) {
         val progress = ProgressBar(64)
         out.print("erasing chip $progress")
+        out.flush()
         backer.eraseChip(type) {
             progress.set(it)
             out.print("\rerasing chip $progress")
+            out.flush()
             progressCallback(it)
         }
         out.println()
@@ -45,20 +51,23 @@ class ConsoleLoggingProgrammer(val backer: Programmer, val out: PrintWriter = Pr
 
     override fun lockChip() {
         out.print("locking chip...")
+        out.flush()
         backer.lockChip()
-        out.print(" ok\n")
+        out.println(" ok")
     }
 
     override fun unlockChip() {
         out.print("unlocking chip...")
+        out.flush()
         backer.unlockChip()
-        out.print(" ok\n")
+        out.println(" ok")
     }
 
     override fun identifyType(): ChipType {
         out.print("determining chip type...")
+        out.flush()
         val type = backer.identifyType()
-        out.print(" ok\n")
+        out.println(" ${type.title}")
         return type
     }
 

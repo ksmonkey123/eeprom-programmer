@@ -26,16 +26,17 @@ class FlashCommand : Runnable {
     override fun run() {
         val out = spec.commandLine().out
         if (!file.canRead()) {
-            out.print("ERROR: file ${file.canonicalPath} cannot be read or does not exist!\n")
+            out.println("ERROR: file ${file.canonicalPath} cannot be read or does not exist!")
             return
         }
 
         out.print("reading file ${file.canonicalPath}...")
+        out.flush()
         val file = HexFileReader(Files.newInputStream(file.toPath())).use { reader ->
             reader.read()!!
         }
 
-        out.print(" ${file.currentSize} bytes\n")
+        out.println(" ${file.currentSize} bytes")
 
         val programmer = ConsoleLoggingProgrammer(cli.programmerFactory(), out)
 
@@ -57,6 +58,6 @@ class FlashCommand : Runnable {
             programmer.lockChip()
         }
 
-        out.print("done\n")
+        out.println("done")
     }
 }
