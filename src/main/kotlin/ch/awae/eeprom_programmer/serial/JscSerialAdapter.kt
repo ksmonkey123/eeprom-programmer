@@ -4,13 +4,17 @@ import ch.awae.eeprom_programmer.programmer.ComDevice
 import com.fazecast.jSerialComm.SerialPort
 import com.fazecast.jSerialComm.SerialPortDataListener
 import com.fazecast.jSerialComm.SerialPortEvent
+import java.io.PrintWriter
 
 object JscSerialAdapter {
-    fun findAndConnect(): ComDevice {
+    fun findAndConnect(out: PrintWriter): ComDevice {
         val port = findById(0x2341, 0x0042) // Mega 2560 R3
             ?: findById(0x2341, 0x0010) // Mega 2560
             ?: findById(0x2341) // any other Arduino Board
             ?: error("unable to find any compatible board")
+
+        out.print("connecting to ${port.systemPortPath}...")
+        out.flush()
 
         port.setComPortParameters(230400, 8, 1, 0)
         port.setComPortTimeouts(SerialPort.TIMEOUT_NONBLOCKING, 0, 0)
@@ -42,6 +46,9 @@ object JscSerialAdapter {
         }
 
         Thread.sleep(1000)
+
+        out.println(" ok")
+        out.flush()
 
         return comDevice
     }

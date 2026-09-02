@@ -16,7 +16,7 @@ class LockCommand : Runnable {
 
     override fun run() {
         val out = spec.commandLine().out
-        val programmer = ConsoleLoggingProgrammer(cli.programmerFactory(), out)
+        val programmer = ConsoleLoggingProgrammer(cli.programmerFactory(out), out)
 
         programmer.lockChip()
 

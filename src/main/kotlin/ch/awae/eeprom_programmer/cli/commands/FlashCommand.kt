@@ -40,7 +40,7 @@ class FlashCommand : Runnable {
         out.println(" ${file.currentSize} bytes")
         out.flush()
 
-        val programmer = ConsoleLoggingProgrammer(cli.programmerFactory(), out)
+        val programmer = ConsoleLoggingProgrammer(cli.programmerFactory(out), out)
 
         if (cli.options.unlock) {
             programmer.unlockChip()

@@ -16,7 +16,7 @@ class UnlockCommand : Runnable {
 
     override fun run() {
         val out = spec.commandLine().out
-        val programmer = ConsoleLoggingProgrammer(cli.programmerFactory(), out)
+        val programmer = ConsoleLoggingProgrammer(cli.programmerFactory(out), out)
 
         if (cli.options.lock) {
             out.println("WARNING: lock option is set but will be ignored!")
