@@ -12,11 +12,11 @@ import kotlin.time.measureTimedValue
 class ConsoleLoggingProgrammer(val backer: Programmer, val out: PrintWriter = PrintWriter(System.out)) : Programmer {
 
     override fun dumpMemory(type: ChipType, progressCallback: (ProgressReport) -> Unit): Result<ByteArray> {
-        return runWithProgressReport("reading from chip", progressCallback) { backer.dumpMemory(type, it) }
+        return runWithProgressReport("reading chip", progressCallback) { backer.dumpMemory(type, it) }
     }
 
     override fun flashChip(type: ChipType, file: BinaryFile, progressCallback: (ProgressReport) -> Unit): Result<Unit> {
-        return runWithProgressReport("writing to chip", progressCallback) { backer.flashChip(type, file, it) }
+        return runWithProgressReport("writing chip", progressCallback) { backer.flashChip(type, file, it) }
     }
 
     override fun eraseChip(type: ChipType, progressCallback: (ProgressReport) -> Unit): Result<Unit> {
