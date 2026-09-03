@@ -20,6 +20,9 @@ class DumpCommand : Runnable {
     @ParentCommand
     lateinit var cli: EepromCLI
 
+    @Option(names = ["-r", "--raw"], description = ["retain raw memory layout"])
+    var retainRaw: Boolean = false
+
     @Parameters(index = "0", paramLabel = "<file>", description = ["the output file path"])
     lateinit var file: File
 
@@ -38,7 +41,7 @@ class DumpCommand : Runnable {
 
         out.print("post-processing data...")
         out.flush()
-        val output = if (type == null) {
+        val output = if (type == null && !retainRaw) {
             postProcessContents(contents)
         } else {
             contents

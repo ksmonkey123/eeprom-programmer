@@ -15,5 +15,5 @@ public:
 
     void unlock(int len);
 
-    void identifyType(const char *args, int len);
+    void identifyType(int len);
 };

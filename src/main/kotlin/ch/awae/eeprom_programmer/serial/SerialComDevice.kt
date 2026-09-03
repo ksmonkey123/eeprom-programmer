@@ -42,7 +42,7 @@ class SerialComDevice(val writer: (String) -> Unit) : ComDevice {
 
             writer(command)
             try {
-                return future.get(10, TimeUnit.SECONDS)
+                return future.get(30, TimeUnit.SECONDS)
             } finally {
                 // clean up the future
                 this.future = null

@@ -129,7 +129,7 @@ void printTypeResult(ChipType type, Print &output) {
     }
 }
 
-void CommandExecutor::identifyType(const char *args, int len) {
+void CommandExecutor::identifyType(int len) {
     if (validateLength(len, 0, output)) {
         ChipType size;
         WriteResult result = ops::identifyType(&size);

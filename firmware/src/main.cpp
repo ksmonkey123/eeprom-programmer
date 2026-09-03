@@ -43,7 +43,7 @@ __attribute__((noreturn)) void loop() {
                 cmd.pageWrite(args, len);
                 break;
             case 'i':
-                cmd.identifyType(args, len);
+                cmd.identifyType(len);
                 break;
             default:
                 output.print(F("-UNSUPPORTED OR MALFORMED COMMAND: "));
