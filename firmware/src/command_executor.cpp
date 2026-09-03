@@ -37,23 +37,32 @@ static bool parseData(const char *buffer, byte *dest, Print &output) {
     return success;
 }
 
-static bool parseSparseDataBlock(const char *buffer, SparsePageElement *dest,
-                                 int *countDest, int bytes, Print &output) {
+static bool parseSparseDataBlock(const char *buffer,
+                                 const byte *currentData,
+                                 SparsePageElement *dest,
+                                 int *countDest,
+                                 int bytes,
+                                 Print &output) {
     *countDest = 0;
     for (int i = 0; i < bytes; i++) {
         if (buffer[2 * i] == '.' && buffer[2 * i + 1] == '.') {
             // skip element
             continue;
-        } else {
-            byte data;
-            if (!parseData(buffer + (2 * i), &data, output)) {
-                return false;
-            }
-            // we have found a new element
-            dest[*countDest].offset = i;
-            dest[*countDest].data = data;
-            (*countDest)++;
         }
+        byte data;
+        if (!parseData(buffer + (2 * i), &data, output)) {
+            return false;
+        }
+
+        if (data == currentData[i]) {
+            // data is identical, no need to update
+            continue;
+        }
+
+        // we have found a new element
+        dest[*countDest].offset = i;
+        dest[*countDest].data = data;
+        (*countDest)++;
     }
     return true;
 }
@@ -155,15 +164,22 @@ void CommandExecutor::pageRead(const char *args, int len) {
     }
 }
 
+static bool readCurrentData(address adr, byte *data) {
+    ops::pageRead(adr, data);
+    return true;
+}
+
 void CommandExecutor::pageWrite(const char *args, int len) {
     address adr;
     SparsePageElement elements[64];
     int nelements;
+    byte currentData[64];
 
     if (validateLength(len, 133, output) &&
         parseAddress(args, &adr, true, output) &&
         validateChar(args, 4, ':', output) &&
-        parseSparseDataBlock(args + 5, elements, &nelements, 64, output)) {
+        readCurrentData(adr, currentData) &&
+        parseSparseDataBlock(args + 5, currentData, elements, &nelements, 64, output)) {
         WriteResult result = ops::pageWrite(adr, elements, nelements);
         sendWriteResult(result, output);
     }
