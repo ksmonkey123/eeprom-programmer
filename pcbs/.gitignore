@@ -1,5 +1,6 @@
 #backups are built as zips
 *.zip
+*.bak
 
 #lock files
 *.lck
