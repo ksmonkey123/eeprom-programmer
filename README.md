@@ -23,7 +23,7 @@ It is even possible to unlock an EEPROM, write to it, and lock it again in a sin
 
 Since the programmer supports 2 different sizes of EEPROMs, the user would have to indicate what type is connected to
 the programmer for any given command.
-The _Client Program_ is however capable of "guessing" the safe EEPROM size for most operations.
+The _Client Program_ is, however, capable of "guessing" the safe EEPROM size for most operations.
 In some cases this may lead to additional unnecessary write cycles on smaller chips (which we consider to be a
 negligible downside) and potentially increased operation durations.
 
@@ -53,16 +53,13 @@ bool isLargeChip(bool preserveData) {
 }
 ```
 
+### Considerate Writes
+
+Unnecessary Write operations are avoided whenever possible. 
+This means that the programmer will not write to a byte if the new value is the same as the old one.
+This reduces both write times and wear on the EEPROM.
+
 ## Operations
-
-### Live Mode
-
-The `live` mode creates an interactive terminal between the user and the _Programmer Device_ for interactive
-manipulation
-of the EEPROM.
-This is primarily used for testing or analysis purposes.
-Lock- and Unlock-Flags are not respected in this mode (there are manual unlock and lock commands), neither are size
-flags as they are irrelevant in this mode.
 
 ### Erase
 
