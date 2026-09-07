@@ -14,9 +14,10 @@ Communications::Communications(HardwareSerial &channel) : channel(channel) {
     initCommunications(channel);
 }
 
-Print &Communications::getOutput() { return channel; }
+Print &Communications::getOutput() const { return channel; }
 
-static void log_command_buffer_overflow(HardwareSerial &channel, char const *buffer, int limit, int overflow) {
+static void log_command_buffer_overflow(HardwareSerial &channel, char const *buffer, const int limit,
+                                        const int overflow) {
     channel.print(F("-SYNTAX ERROR: COMMAND BUFFER OVERFLOW: "));
     for (int i = 0; i < limit; i++) {
         channel.print(buffer[i]);
@@ -27,10 +28,10 @@ static void log_command_buffer_overflow(HardwareSerial &channel, char const *buf
     channel.println(F(" more chars)"));
 }
 
-int Communications::receiveNextCommand(char *buffer, int limit) {
+int Communications::receiveNextCommand(char *buffer, const int limit) const {
     int buffer_length = 0;
     while (true) {
-        char c = readNextCharBlocking(channel);
+        const char c = readNextCharBlocking(channel);
 
         if (c != '\n') {
             // if buffer already full, we need to throw everything out.
@@ -39,7 +40,7 @@ int Communications::receiveNextCommand(char *buffer, int limit) {
                 buffer[buffer_length++] = c;
             } else {
                 leds::setErrorIndicator(true);
-                int overflow = consumeUntilNextLineBreak(channel);
+                const int overflow = consumeUntilNextLineBreak(channel);
                 log_command_buffer_overflow(channel, buffer, limit, overflow);
                 buffer_length = 0;
             }
@@ -87,7 +88,7 @@ static char readNextCharBlocking(HardwareSerial &serial) {
 static int consumeUntilNextLineBreak(HardwareSerial &serial) {
     int counter = 1;
     while (true) {
-        char c = readNextCharBlocking(serial);
+        const char c = readNextCharBlocking(serial);
         if (c == '\n') {
             return counter;
         }

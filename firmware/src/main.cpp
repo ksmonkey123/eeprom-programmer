@@ -19,15 +19,15 @@ void setup() {
 __attribute__((noreturn)) void loop() {
     static char buffer[134];
 
-    Communications comms(Serial);
+    const Communications comms(Serial);
     Print &output = comms.getOutput();
-    CommandExecutor cmd(output);
+    const CommandExecutor cmd(output);
 
     while (true) {
-        int length = comms.receiveNextCommand(buffer, 134);
+        const int length = comms.receiveNextCommand(buffer, 134);
 
         char const *args = buffer + 1;
-        int len = length - 1;
+        const int len = length - 1;
 
         switch (buffer[0]) {
             case 'l':

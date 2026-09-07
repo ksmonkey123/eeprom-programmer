@@ -2,7 +2,7 @@
 
 #include "rom_interface.h"
 
-static WriteResult createError(address address, byte expected, byte actual) {
+static WriteResult createError(const address address, const byte expected, const byte actual) {
     return WriteResult{
         .success = false,
         .error = {
@@ -19,8 +19,7 @@ static WriteResult createSuccess() {
     };
 }
 
-
-void ops::pageRead(address address, byte *dest) {
+void ops::pageRead(const address address, byte *dest) {
     RomInterface interface;
 
     for (byte i = 0; i < 64; i++) {
@@ -28,9 +27,7 @@ void ops::pageRead(address address, byte *dest) {
     }
 }
 
-WriteResult ops::pageWrite(address address,
-                                 const SparsePageElement *elements,
-                                 int nelements) {
+WriteResult ops::pageWrite(const address address, const SparsePageElement *elements, const int nelements) {
     RomInterface interface;
 
     for (int i = 0; i < nelements && i < 64; i++) {
@@ -39,7 +36,7 @@ WriteResult ops::pageWrite(address address,
 
     // verify
     for (int i = 0; i < nelements && i < 64; i++) {
-        byte readback = interface.read(address + elements[i].offset);
+        const byte readback = interface.read(address + elements[i].offset);
         if (elements[i].data != readback) {
             return createError(address + elements[i].offset, elements[i].data,
                                readback);
@@ -69,11 +66,10 @@ void ops::unlockSDP() {
 
 WriteResult ops::identifyType(ChipType *dest) {
     RomInterface interface;
-    byte readback;
 
-    auto adr = static_cast<address>(random(0x0000, 0x2000));
-    byte data = interface.read(adr);
-    byte inverse = ~data;
+    const auto adr = static_cast<address>(random(0x0000, 0x2000));
+    const byte data = interface.read(adr);
+    const byte inverse = ~data;
 
     // if there's different data in the "high" block, it is a large chip, no
     // further testing required.
@@ -84,7 +80,7 @@ WriteResult ops::identifyType(ChipType *dest) {
 
     // modify low byte, check if high byte changes too
     interface.write(adr, inverse);
-    readback = interface.read(adr);
+    byte readback = interface.read(adr);
     if (readback != inverse) {
         return createError(adr, inverse, readback);
     }

@@ -41,7 +41,7 @@ static bool parseSparseDataBlock(const char *buffer,
                                  const byte *currentData,
                                  SparsePageElement *dest,
                                  int *countDest,
-                                 int bytes,
+                                 const int bytes,
                                  Print &output) {
     *countDest = 0;
     for (int i = 0; i < bytes; i++) {
@@ -60,14 +60,14 @@ static bool parseSparseDataBlock(const char *buffer,
         }
 
         // we have found a new element
-        dest[*countDest].offset = i;
+        dest[*countDest].offset = static_cast<byte>(i);
         dest[*countDest].data = data;
         (*countDest)++;
     }
     return true;
 }
 
-static bool validateLength(int actual, int expected, Print &output) {
+static bool validateLength(const int actual, const int expected, Print &output) {
     if (actual != expected) {
         output.print(F("-ILLEGAL COMMAND LENGTH. EXPECTED "));
         output.print(expected);
@@ -79,7 +79,7 @@ static bool validateLength(int actual, int expected, Print &output) {
     return true;
 }
 
-static bool validateChar(const char *args, int position, char expected,
+static bool validateChar(const char *args, const int position, const char expected,
                          Print &output) {
     if (args[position] != expected) {
         output.print(F("-UNEXPECTED CHARACTER "));
@@ -93,7 +93,7 @@ static bool validateChar(const char *args, int position, char expected,
     return true;
 }
 
-static void sendWriteResult(WriteResult &result, Print &output) {
+static void sendWriteResult(const WriteResult &result, Print &output) {
     if (result.success) {
         output.println('+');
     } else {
@@ -110,21 +110,21 @@ static void sendWriteResult(WriteResult &result, Print &output) {
 CommandExecutor::CommandExecutor(Print &output) : output(output) {
 }
 
-void CommandExecutor::lock(int len) {
+void CommandExecutor::lock(const int len) const {
     if (validateLength(len, 0, output)) {
         ops::lockSDP();
         output.println('+');
     }
 }
 
-void CommandExecutor::unlock(int len) {
+void CommandExecutor::unlock(const int len) const {
     if (validateLength(len, 0, output)) {
         ops::unlockSDP();
         output.println('+');
     }
 }
 
-void printTypeResult(ChipType type, Print &output) {
+static void printTypeResult(const ChipType type, Print &output) {
     switch (type) {
         case SMALL_SOCKET:
             output.println(F("+SS"));
@@ -138,7 +138,7 @@ void printTypeResult(ChipType type, Print &output) {
     }
 }
 
-void CommandExecutor::identifyType(int len) {
+void CommandExecutor::identifyType(int len) const {
     if (validateLength(len, 0, output)) {
         ChipType size;
         WriteResult result = ops::identifyType(&size);
@@ -150,7 +150,7 @@ void CommandExecutor::identifyType(int len) {
     }
 }
 
-void CommandExecutor::pageRead(const char *args, int len) {
+void CommandExecutor::pageRead(const char *args, int len) const {
     address adr;
     if (validateLength(len, 4, output) &&
         parseAddress(args, &adr, true, output)) {
@@ -169,7 +169,7 @@ static bool readCurrentData(address adr, byte *data) {
     return true;
 }
 
-void CommandExecutor::pageWrite(const char *args, int len) {
+void CommandExecutor::pageWrite(const char *args, int len) const {
     address adr;
     SparsePageElement elements[64];
     int nelements;

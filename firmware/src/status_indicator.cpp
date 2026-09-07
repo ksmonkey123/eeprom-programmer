@@ -5,17 +5,17 @@
 #define WRITE_LED 31
 #define ERROR_LED 33
 
-void leds::setActiveIndicator(bool state) {
+void leds::setActiveIndicator(const bool state) {
     pinMode(CHIP_ENABLE_LED, OUTPUT);
     digitalWrite(CHIP_ENABLE_LED, state);
 }
 
-void leds::setWriteIndicator(bool state) {
+void leds::setWriteIndicator(const bool state) {
     pinMode(WRITE_LED, OUTPUT);
     digitalWrite(WRITE_LED, state);
 }
 
-void leds::setErrorIndicator(bool state) {
+void leds::setErrorIndicator(const bool state) {
     pinMode(ERROR_LED, OUTPUT);
     digitalWrite(ERROR_LED, state);
 }

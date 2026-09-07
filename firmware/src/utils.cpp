@@ -1,6 +1,6 @@
 #include "../include/utils.h"
 
-static byte hexCharToHalfByte(char input) {
+static byte hexCharToHalfByte(const char input) {
     switch (input) {
         case '0':
             return 0;
@@ -40,8 +40,8 @@ static byte hexCharToHalfByte(char input) {
 }
 
 bool hexToByte(const char *input, byte *dest) {
-    byte high = hexCharToHalfByte(input[0]);
-    byte low = hexCharToHalfByte(input[1]);
+    const byte high = hexCharToHalfByte(input[0]);
+    const byte low = hexCharToHalfByte(input[1]);
 
     if (high == 255 || low == 255) {
         return false;
@@ -54,7 +54,7 @@ bool hexToByte(const char *input, byte *dest) {
 bool hexToAddress(const char *input, address *dest) {
     address result = 0;
     for (byte i = 0; i < 4; i++) {
-        byte nextHalfByte = hexCharToHalfByte(input[i]);
+        const byte nextHalfByte = hexCharToHalfByte(input[i]);
         if (nextHalfByte == 255) {
             return false;
         }
@@ -66,20 +66,19 @@ bool hexToAddress(const char *input, address *dest) {
     // it as bad.
     if (result > 0x7fff) {
         return false;
-    } else {
-        *dest = result;
-        return true;
     }
+    *dest = result;
+    return true;
 }
 
-void printData(byte value, Print &output) {
+void printData(const byte value, Print &output) {
     if (value < 0x10) {
         output.print('0');
     }
     output.print(value, HEX);
 }
 
-void printAddress(address value, Print &output) {
+void printAddress(const address value, Print &output) {
     if (value < 0x1000) {
         output.print('0');
     }

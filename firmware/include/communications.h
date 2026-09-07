@@ -17,10 +17,10 @@ public:
      * length.
      * @return length of received command.
      */
-    int receiveNextCommand(char *buffer, int limit);
+    int receiveNextCommand(char *buffer, int limit) const;
 
     /**
      * Get a printer for sending responses to the host
      */
-    Print &getOutput();
+    Print &getOutput() const;
 };

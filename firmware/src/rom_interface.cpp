@@ -65,7 +65,7 @@ RomInterface::~RomInterface() {
     state = IDLE;
 }
 
-byte RomInterface::read(address address) {
+byte RomInterface::read(const address address) {
     if (state == WRITE) {
         endWriteCycle();
     } else if (state == IDLE) {
@@ -79,7 +79,7 @@ byte RomInterface::read(address address) {
     return DATA_BUS_I;
 }
 
-void RomInterface::write(address address, byte data) {
+void RomInterface::write(const address address, const byte data) {
     if (state == IDLE) {
         startAccess();
         startWriteCycle();
