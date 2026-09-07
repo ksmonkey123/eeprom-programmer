@@ -79,14 +79,6 @@
       ],
       "drc_exclusions": [
         [
-          "unconnected_items|102286000|49200000|F.Cu|4|b0dc7dda-00e9-4e1a-adfc-3951cbc4c107|a17830c4-1a80-49f4-bdc7-f1d8b2fd8bf0",
-          ""
-        ],
-        [
-          "unconnected_items|104826000|49200000|F.Cu|4|8ebd19d1-ad20-4c31-98d6-6a594fc18fcf|01304f6d-0987-4405-bf5e-dff5d75414b2",
-          ""
-        ],
-        [
           "unconnected_items|177470000|49200000|F.Cu|4|987c05d5-3b70-46fa-b482-12167feae7ad|a9198436-1e88-48c3-a3ce-5db97404a1f3",
           ""
         ],

@@ -12,3 +12,5 @@
 fp-info-cache
 !gerber_bundles/*.zip
 .history
+
+pcbway_production/
